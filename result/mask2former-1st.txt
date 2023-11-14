@@ -14,6 +14,12 @@ recall@20=0.39923624635168753,mRecall=0.3743796526054591
 recall@20=0.41990702827424975,mRecall=0.39598686610726014, classM=0.2699713484765198
 baseline:
 recall@20=0.39004137958108615,mRecall=0.3683327252827435, classM=0.2594795896004595
+SGG eval:  R @ 20: 0.3657;  R @ 50: 0.4484;  R @ 100: 0.4879;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4301;  R @ 50: 0.5268;  R @ 100: 0.5788;  for mode=phrdet, type=Recall.
+SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=sgdet, type=NoGraphConstraint @ 56 Recall.
+SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=phrdet, type=NoGraphConstraint @ 56 Recall.
+SGG eval:  mR @ 20: 0.2409;  mR @ 50: 0.3405;  mR @ 100: 0.3932;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2902;  mR @ 50: 0.4029;  mR @ 100: 0.4691;  for mode=phrdet, type=Mean Recall.
 
 64_1
 param= 56.760576 recall@20=0.4050574810810105, mRecall=0.3793424317617866, classM=0.2555069620390836
