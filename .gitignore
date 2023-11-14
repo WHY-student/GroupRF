@@ -116,4 +116,5 @@ output/
 mmdetection/
 panopticapi/
 core
+!core/
 checkpoints/
