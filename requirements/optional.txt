@@ -1,0 +1,6 @@
+cityscapesscripts
+imagecorruptions
+scipy
+sklearn
+timm
+-e git+https://github.com/open-mmlab/mmtracking#egg=mmtrack
