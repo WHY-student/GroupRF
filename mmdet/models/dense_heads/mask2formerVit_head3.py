@@ -23,44 +23,44 @@ from IPython import embed
 
 from ..utils.group_token import GroupingLayer, GroupingBlock
 
-class fixed_GroupingLayer(GroupingLayer):
-    def __init__(self, dim, num_input_token, depth, num_heads, num_group_token, mlp_ratio=4, qkv_bias=True, qk_scale=None, drop=0, attn_drop=0, drop_path=0, norm_layer=nn.LayerNorm, downsample=None, use_checkpoint=False, group_projector=None, zero_init_group_token=False):
-        super().__init__(dim, num_input_token, depth, num_heads, num_group_token, mlp_ratio, qkv_bias, qk_scale, drop, attn_drop, drop_path, norm_layer, downsample, use_checkpoint, group_projector, zero_init_group_token)
-        self.group_token = None
-        self.num_group_token = 8
+# class fixed_GroupingLayer(GroupingLayer):
+#     def __init__(self, dim, num_input_token, depth, num_heads, num_group_token, mlp_ratio=4, qkv_bias=True, qk_scale=None, drop=0, attn_drop=0, drop_path=0, norm_layer=nn.LayerNorm, downsample=None, use_checkpoint=False, group_projector=None, zero_init_group_token=False):
+#         super().__init__(dim, num_input_token, depth, num_heads, num_group_token, mlp_ratio, qkv_bias, qk_scale, drop, attn_drop, drop_path, norm_layer, downsample, use_checkpoint, group_projector, zero_init_group_token)
+#         self.group_token = None
+#         self.num_group_token = 8
     
-    def forward(self, x, prev_group_token=None, return_attn=False):
-        """
-        Args:
-            x (torch.Tensor): image tokens, [B, L, C]
-            prev_group_token (torch.Tensor): group tokens, [B, S_1, C]
-            return_attn (bool): whether to return attention maps
-        """
-        group_token = prev_group_token
+#     def forward(self, x, prev_group_token=None, return_attn=False):
+#         """
+#         Args:
+#             x (torch.Tensor): image tokens, [B, L, C]
+#             prev_group_token (torch.Tensor): group tokens, [B, S_1, C]
+#             return_attn (bool): whether to return attention maps
+#         """
+#         group_token = prev_group_token
 
-        B, L, C = x.shape
-        cat_x = self.concat_x(x, group_token)
-        for blk_idx, blk in enumerate(self.blocks):
-            if self.use_checkpoint:
-                cat_x = checkpoint.checkpoint(blk, cat_x)
-            else:
-                cat_x = blk(cat_x)
+#         B, L, C = x.shape
+#         cat_x = self.concat_x(x, group_token)
+#         for blk_idx, blk in enumerate(self.blocks):
+#             if self.use_checkpoint:
+#                 cat_x = checkpoint.checkpoint(blk, cat_x)
+#             else:
+#                 cat_x = blk(cat_x)
 
-        x, group_token = self.split_x(cat_x)
+#         x, group_token = self.split_x(cat_x)
 
-        attn_dict = None
-        if self.downsample is not None:
-            x, attn_dict = self.downsample(x, group_token, return_attn=return_attn)
-        # if return_attn:
-        #     return x, group_token, attn_dict
-        # else:
-        return x
+#         attn_dict = None
+#         if self.downsample is not None:
+#             x, attn_dict = self.downsample(x, group_token, return_attn=return_attn)
+#         # if return_attn:
+#         #     return x, group_token, attn_dict
+#         # else:
+#         return x
     
-    def split_x(self, x):
-        # if self.with_group_token:
-        return x[:, :-self.num_group_token], x[:, -self.num_group_token:]
-        # else:
-        #     return x, None
+#     def split_x(self, x):
+#         # if self.with_group_token:
+#         return x[:, :-self.num_group_token], x[:, -self.num_group_token:]
+#         # else:
+#         #     return x, None
 
         
 
@@ -84,16 +84,6 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
                  train_cfg=None,
                  test_cfg=None,
                  init_cfg=None,
-                 token_num=8,
-                 hard_assignment=True,
-                 depths=[3, 3, 3, 3, 3, 3, 3, 3, 3],
-                 mlp_ratio=4.,
-                 use_checkpoint=False,
-                 qkv_bias=True,
-                 qk_scale=None,
-                 drop_rate=0.,
-                 attn_drop_rate=0.,
-                 drop_path_rate=0.1,
                  **kwargs):
         super(AnchorFreeHead, self).__init__(init_cfg)
         self.num_things_classes = num_things_classes
@@ -156,47 +146,47 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
         self.loss_dice = build_loss(loss_dice)
 
 
-        # 添加随机token层训练
-        self.token_num = token_num
-        self.learnable_token_embedding = nn.Embedding(self.token_num, feat_channels)
+        # # 添加随机token层训练
+        # self.token_num = token_num
+        # self.learnable_token_embedding = nn.Embedding(self.token_num, feat_channels)
 
-        # 添加self-attention+group_block
-        norm_layer = nn.LayerNorm
-        self.norm = norm_layer(feat_channels)
-        num_input_token = 100
-        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
+        # # 添加self-attention+group_block
+        # norm_layer = nn.LayerNorm
+        # self.norm = norm_layer(feat_channels)
+        # num_input_token = 100
+        # dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
 
-        self.layers = nn.ModuleList()
-        drop_index = 0
-        # print("num_transformer_feat_level: ", self.num_transformer_feat_level)
-        for i_layer in range(self.num_transformer_feat_level):
-            downsample = GroupingBlock(
-                dim=feat_channels,
-                out_dim=feat_channels,
-                num_heads=8,
-                num_group_token=self.token_num,
-                num_output_group=self.token_num,
-                norm_layer=norm_layer,
-                hard=hard_assignment,
-                gumbel=hard_assignment)
-            layer = fixed_GroupingLayer(
-                dim=feat_channels,
-                num_input_token=num_input_token,
-                depth=3,
-                num_heads=8,
-                num_group_token=0,
-                mlp_ratio=mlp_ratio,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop=drop_rate,
-                attn_drop=attn_drop_rate,
-                drop_path=dpr[drop_index : drop_index + depths[i_layer]],
-                norm_layer=norm_layer,
-                downsample=downsample,
-                use_checkpoint=use_checkpoint,
-                )
-            self.layers.append(layer)
-            drop_index += depths[i_layer]
+        # self.layers = nn.ModuleList()
+        # drop_index = 0
+        # # print("num_transformer_feat_level: ", self.num_transformer_feat_level)
+        # for i_layer in range(self.num_transformer_feat_level):
+        #     downsample = GroupingBlock(
+        #         dim=feat_channels,
+        #         out_dim=feat_channels,
+        #         num_heads=8,
+        #         num_group_token=self.token_num,
+        #         num_output_group=self.token_num,
+        #         norm_layer=norm_layer,
+        #         hard=hard_assignment,
+        #         gumbel=hard_assignment)
+        #     layer = fixed_GroupingLayer(
+        #         dim=feat_channels,
+        #         num_input_token=num_input_token,
+        #         depth=3,
+        #         num_heads=8,
+        #         num_group_token=0,
+        #         mlp_ratio=mlp_ratio,
+        #         qkv_bias=qkv_bias,
+        #         qk_scale=qk_scale,
+        #         drop=drop_rate,
+        #         attn_drop=attn_drop_rate,
+        #         drop_path=dpr[drop_index : drop_index + depths[i_layer]],
+        #         norm_layer=norm_layer,
+        #         downsample=downsample,
+        #         use_checkpoint=use_checkpoint,
+        #         )
+        #     self.layers.append(layer)
+        #     drop_index += depths[i_layer]
 
 
     def init_weights(self):
@@ -450,7 +440,8 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
         assert gt_bboxes_ignore is None
 
         # forward
-        all_cls_scores, all_mask_preds, mask_features, query_feat, group_tokens = self(feats, img_metas)
+        all_cls_scores, all_mask_preds, mask_features, query_feat = self(feats, img_metas)
+        # all_cls_scores, all_mask_preds, mask_features, query_feat, group_tokens = self(feats, img_metas)
 
         # preprocess ground truth
         gt_labels, gt_masks = self.preprocess_gt(gt_labels, gt_masks,
@@ -476,7 +467,7 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
         # mask_pred_results (batch_size, num_queries, h, w).
         # query_feat (batch_size, num_queries, cls_out_channels)
         
-        return losses, query_feat, pos_inds_list, pos_assigned_gt_inds_list, group_tokens
+        return losses, query_feat, pos_inds_list, pos_assigned_gt_inds_list
         # return losses, mask_cls_results, mask_pred_results, mask_features, query_feat, pos_inds_list, pos_assigned_gt_inds_list 
         # return losses, mask_features, query_feat
 
@@ -575,10 +566,6 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
         cls_pred_list.append(cls_pred)
         mask_pred_list.append(mask_pred)
 
-        # token初始化
-        token_embeddings = self.learnable_token_embedding.weight
-        group_tokens = token_embeddings.unsqueeze(0).repeat(batch_size, 1, 1)
-
         for i in range(self.num_transformer_feat_level):
             level_idx = i % self.num_transformer_feat_level
             # if a mask is all True(all background), then set it all False.
@@ -601,8 +588,8 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
                 key_padding_mask=None)
             
             # 在过decoder后和token做cross_attention
-            group_tokens = self.layers[i](query_feat.permute(1, 0, 2), group_tokens)
-            group_tokens = self.norm(group_tokens)
+            # group_tokens = self.layers[i](query_feat.permute(1, 0, 2), group_tokens)
+            # group_tokens = self.norm(group_tokens)
             cls_pred, mask_pred, attn_mask = self.forward_head(
                 query_feat, mask_features, multi_scale_memorys[
                     (i + 1) % self.num_transformer_feat_level].shape[-2:])
@@ -612,7 +599,8 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
 
         # return cls_pred_list, mask_pred_list
         # query_feat 用来为后续的Group token提供feature
-        return cls_pred_list, mask_pred_list, mask_features, query_feat.permute(1, 0, 2), group_tokens
+        return cls_pred_list, mask_pred_list, mask_features, query_feat.permute(1, 0, 2)
+        # return cls_pred_list, mask_pred_list, mask_features, query_feat.permute(1, 0, 2), group_tokens
 
     def loss(self, all_cls_scores, all_mask_preds, gt_labels_list,
              gt_masks_list, img_metas):
@@ -772,7 +760,7 @@ class Mask2FormerVitHead3(MaskFormerRelationHead):
             - mask_pred_results (Tensor): Mask logits, shape \
                 (batch_size, num_queries, h, w).
         """
-        all_cls_scores, all_mask_preds, mask_features, query_feat, _= self(feats, img_metas)
+        all_cls_scores, all_mask_preds, mask_features, query_feat= self(feats, img_metas)
 
         
         mask_cls_results = all_cls_scores[-1]

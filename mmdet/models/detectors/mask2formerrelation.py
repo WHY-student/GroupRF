@@ -803,7 +803,7 @@ class Mask2FormerRelationForinfer(MaskFormerRelation):
 
             # find topk
             if relationship_output.shape[1] > 1:
-                _, topk_indices = torch.topk(relationship_output.reshape([-1,]), k=20)
+                _, topk_indices = torch.topk(relationship_output.reshape([-1,]), k=100)
 
                 # subject, object, cls
                 for index in topk_indices:

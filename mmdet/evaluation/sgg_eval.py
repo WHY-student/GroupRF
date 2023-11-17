@@ -262,7 +262,7 @@ def evaluate_relation_of_one_image(groundtruth, prediction, global_container,
         return None, None, None
     """
 
-    if len(local_container['pred_classes']) == 0:
+    if len(local_container['pred_classes']) == 0 or len(local_container['pred_rels']) == 0:
         return
 
     # Traditional Metric with Graph Constraint

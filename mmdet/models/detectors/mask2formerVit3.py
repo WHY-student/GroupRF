@@ -88,7 +88,7 @@ class Mask2FormerVit3(Mask2FormerRelation):
         super(SingleStageDetector, self).forward_train(img, img_metas)
         x = self.extract_feat(img)
 
-        losses, query_feat, pos_inds_list, pos_assigned_gt_inds_list, group_tokens  = self.panoptic_head.forward_train(x, img_metas, gt_bboxes,
+        losses, query_feat, pos_inds_list, pos_assigned_gt_inds_list  = self.panoptic_head.forward_train(x, img_metas, gt_bboxes,
                                                   gt_labels, gt_masks,
                                                   gt_semantic_seg,
                                                   gt_bboxes_ignore)
@@ -110,72 +110,134 @@ class Mask2FormerVit3(Mask2FormerRelation):
         return losses
 
     def simple_test(self, imgs, img_metas, **kwargs):
-        """Test without augmentation.
-
-        Args:
-            imgs (Tensor): A batch of images.
-            img_metas (list[dict]): List of image information.
-
-        Returns:
-            list[dict[str, np.array | tuple[list]] | tuple[list]]:
-                Semantic segmentation results and panoptic segmentation \
-                results of each image for panoptic segmentation, or formatted \
-                bbox and mask results of each image for instance segmentation.
-
-            .. code-block:: none
-
-                [
-                    # panoptic segmentation
-                    {
-                        'pan_results': np.array, # shape = [h, w]
-                        'ins_results': tuple[list],
-                        # semantic segmentation results are not supported yet
-                        'sem_results': np.array
-                    },
-                    ...
-                ]
-
-            or
-
-            .. code-block:: none
-
-                [
-                    # instance segmentation
-                    (
-                        bboxes, # list[np.array]
-                        masks # list[list[np.array]]
-                    ),
-                    ...
-                ]
-        """
         feats = self.extract_feat(imgs)
         mask_cls_results, mask_pred_results, mask_features, query_feat = self.panoptic_head.simple_test(feats, img_metas, **kwargs)
         results = self.panoptic_fusion_head.simple_test(mask_cls_results, mask_pred_results, img_metas, **kwargs)
+        
+        device = mask_features.device
+        dtype = mask_features.dtype
 
-        for i in range(len(results)):
-            if 'pan_results' in results[i]:
-                results[i]['pan_results'] = results[i]['pan_results'].detach(
-                ).cpu().numpy()
+        res = results[0]
+        # pan_results = res['pan_results']
+        entityid_list = res['entityid_list']
+        # entity_score_list = res['entity_score_list']
+        target_keep = res['target_keep']
+        # pre_mask = res['object_mask']
 
-            if 'ins_results' in results[i]:
-                labels_per_image, bboxes, mask_pred_binary = results[i][
-                    'ins_results']
-                bbox_results = bbox2result(bboxes, labels_per_image,
-                                           self.num_things_classes)
-                mask_results = [[] for _ in range(self.num_things_classes)]
-                for j, label in enumerate(labels_per_image):
-                    mask = mask_pred_binary[j].detach().cpu().numpy()
-                    mask_results[label].append(mask)
-                results[i]['ins_results'] = bbox_results, mask_results
+        entity_embedding = query_feat[0][target_keep,:]
+        # print(entity_embedding.shape)
+        # entity_res = self.get_entity_embedding(
+        #     pan_result=pan_results,
+        #     entity_id_list=entityid_list,
+        #     entity_score_list=entity_score_list,
+        #     feature_map=mask_features,
+        #     meta=img_metas[0]
+        # )
 
-            assert 'sem_results' not in results[i], 'segmantic segmentation '\
-                'results are not supported yet.'
 
-        if self.num_stuff_classes == 0:
-            results = [res['ins_results'] for res in results]
+        relation_res = []
+        if len(entityid_list) != 0:
+            relation_pred, neg_idx = self.relationship_head.simple_test(query_feat, entity_embedding)
+            # print(relation_pred.shape)
+            relation_pred = torch.softmax(relation_pred, dim=-1)
+            # 去除预测为空关系标签的影响
+            relation_pred = relation_pred[:,1:]
+            relation_pred[neg_idx,:] = -9999
+            try:
+                _, topk_indices = torch.topk(relation_pred.reshape([-1,]), k=100)
+            except:
+                topk_indices = torch.tensor(range(0,len(relation_pred.reshape([-1,]))))
+            # subject, object, cls
+            for index in topk_indices:
+                pred_cls = index % relation_pred.shape[1]
+                index_subject_object = index // relation_pred.shape[1]
+                pred_subject = index_subject_object // entity_embedding.shape[0]
+                pred_object = index_subject_object % entity_embedding.shape[0]
+                pred = [pred_subject.item(), pred_object.item(), pred_cls.item()]
+                relation_res.append(pred)
+     
+        rl = dict(
+            entityid_list=entityid_list,
+            relation=relation_res,
+        )
 
-        return results
-    
+        res['rela_results'] = rl
+        res['pan_results'] = res['pan_results'].detach().cpu().numpy()
+
+        return [res]
+
+    def forward_dummy(self, imgs, img_metas=None):
+        """Used for computing network flops. See
+        `mmdetection/tools/analysis_tools/get_flops.py`
+
+        Args:
+            img (Tensor): of shape (N, C, H, W) encoding input images.
+                Typically these should be mean centered and std scaled.
+            img_metas (list[Dict]): list of image info dict where each dict
+                has: 'img_shape', 'scale_factor', 'flip', and may also contain
+                'filename', 'ori_shape', 'pad_shape', and 'img_norm_cfg'.
+                For details on the values of these keys see
+                `mmdet/datasets/pipelines/formatting.py:Collect`.
+        """
+        if img_metas==None:
+            img_metas = [{'batch_input_shape': img.shape,'img_shape':img.shape, 'ori_shape': img.shape} for img in imgs]
+        feats = self.extract_feat(imgs)
+        mask_cls_results, mask_pred_results, mask_features, query_feat = self.panoptic_head.simple_test(feats, img_metas)
+        results = self.panoptic_fusion_head.simple_test(mask_cls_results, mask_pred_results, img_metas)
+        
+        device = mask_features.device
+        dtype = mask_features.dtype
+
+        res = results[0]
+        # pan_results = res['pan_results']
+        entityid_list = res['entityid_list']
+        # entity_score_list = res['entity_score_list']
+        target_keep = res['target_keep']
+        # pre_mask = res['object_mask']
+
+        entity_embedding = query_feat[0][target_keep,:]
+        # print(entity_embedding.shape)
+        # entity_res = self.get_entity_embedding(
+        #     pan_result=pan_results,
+        #     entity_id_list=entityid_list,
+        #     entity_score_list=entity_score_list,
+        #     feature_map=mask_features,
+        #     meta=img_metas[0]
+        # )
+
+
+        relation_res = []
+        if len(entityid_list) != 0:
+            relation_pred, neg_idx = self.relationship_head.simple_test(query_feat, entity_embedding)
+            # print(relation_pred.shape)
+            relation_pred = torch.softmax(relation_pred, dim=-1)
+            # 去除预测为空关系标签的影响
+            relation_pred = relation_pred[:,1:]
+            relation_pred[neg_idx,:] = -9999
+            try:
+                _, topk_indices = torch.topk(relation_pred.reshape([-1,]), k=100)
+            except:
+                topk_indices = torch.tensor(range(0,len(relation_pred.reshape([-1,]))))
+            # subject, object, cls
+            for index in topk_indices:
+                pred_cls = index % relation_pred.shape[1]
+                index_subject_object = index // relation_pred.shape[1]
+                pred_subject = index_subject_object // entity_embedding.shape[0]
+                pred_object = index_subject_object % entity_embedding.shape[0]
+                pred = [pred_subject.item(), pred_object.item(), pred_cls.item()]
+                relation_res.append(pred)
+     
+        rl = dict(
+            entityid_list=entityid_list,
+            relation=relation_res,
+        )
+
+        res['rela_results'] = rl
+        res['pan_results'] = res['pan_results'].detach().cpu().numpy()
+
+        return [res]
+
+  
     def get_recall_N(self, y_pred, y_true, bs_size, img_metas, N=20):
         # y_pred     [n,57]
         # y_true     [n]
@@ -329,7 +391,9 @@ class Mask2FormerVitForinfer3(Mask2FormerVit3):
         # entity_embedding [1, n, 256]
         return entity_embedding, entity_id_list, entity_score_list
 
-    def simple_test(self, imgs, img_metas, **kwargs):
+    def simple_test(self, imgs, img_metas=None, **kwargs):
+        if img_metas==None:
+            img_metas = [{'batch_input_shape': img.shape,'img_shape':img.shape, 'ori_shape': img.shape} for img in imgs]
         feats = self.extract_feat(imgs)
         mask_cls_results, mask_pred_results, mask_features, query_feat = self.panoptic_head.simple_test(feats, img_metas, **kwargs)
         results = self.panoptic_fusion_head.simple_test(mask_cls_results, mask_pred_results, img_metas, **kwargs)

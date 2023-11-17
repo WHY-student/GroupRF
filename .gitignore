@@ -113,6 +113,7 @@ venv.bak/
 *.log.json
 mmdet/.mim
 output/
+submit/
 mmdetection/
 panopticapi/
 core

@@ -337,6 +337,6 @@ mp_start_method = 'fork'
 
 
 load_from = '/root/autodl-tmp/psg/mfpsg/checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
-resume_from = '/root/autodl-tmp/psg/mfpsg/output/v6/latest.pth'
-# resume_from = None
+# resume_from = '/root/autodl-tmp/psg/mfpsg/output/v6/latest.pth'
+resume_from = None
 work_dir = '/root/autodl-tmp/psg/mfpsg/output/v6'

@@ -499,18 +499,18 @@ class Mask2FormerVitForinfer2(Mask2FormerVit2):
         group_token = self.norm(group_token)
         group_token = group_token[0]
 
-        # print(group_token.shape)
-        cos_scores = [[0]*4 for _ in range(4)]
-        for i in range(4):
-            for j in range(4):
-                cos_scores[i][j] = round(F.cosine_similarity(group_token[i].unsqueeze(0),group_token[j].unsqueeze(0)).item(),2)
-        print(cos_scores)
-        sns.heatmap(cos_scores, annot=True, cmap="YlGnBu")
-        # 可选：添加轴标签
-        plt.xlabel("X")
-        plt.ylabel("Y")
-        plt.savefig('token_cos_8_4_None.png')
-        exit(0)
+        # # print(group_token.shape)
+        # cos_scores = [[0]*4 for _ in range(4)]
+        # for i in range(4):
+        #     for j in range(4):
+        #         cos_scores[i][j] = round(F.cosine_similarity(group_token[i].unsqueeze(0),group_token[j].unsqueeze(0)).item(),2)
+        # print(cos_scores)
+        # sns.heatmap(cos_scores, annot=True, cmap="YlGnBu")
+        # # 可选：添加轴标签
+        # plt.xlabel("X")
+        # plt.ylabel("Y")
+        # plt.savefig('token_cos_8_4_None.png')
+        # exit(0)
 
         relation_res = []
         if len(entityid_list) != 0:

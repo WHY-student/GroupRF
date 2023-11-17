@@ -42,21 +42,6 @@ class Mask2FormerVitHead2(MaskFormerRelationHead):
                  train_cfg=None,
                  test_cfg=None,
                  init_cfg=None,
-                 mlp_ratio=4.,
-                 embed_dim=256,
-                 embed_factors=[1, 1, 1],
-                 num_heads=[8, 8, 8],
-                 num_group_tokens=[64, 8, 0],
-                 num_output_groups=[64,8],
-                 qkv_bias=True,
-                 qk_scale=None,
-                 drop_rate=0.,
-                 attn_drop_rate=0.,
-                 drop_path_rate=0.1,
-                 depths=[6, 3, 3],
-                 use_checkpoint=False,
-                 hard_assignment=True,
-                 feed_forward=1024,
                  **kwargs):
         super(AnchorFreeHead, self).__init__(init_cfg)
         self.num_things_classes = num_things_classes

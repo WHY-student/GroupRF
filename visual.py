@@ -16,21 +16,22 @@ from detectron2.utils.visualizer import VisImage, Visualizer
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from infer_p import get_model
 
-def get_model(cfg, ckp, transformers_model):
-    # print(cfg)
-    # print(type(cfg))
-    cfg = mmcv.Config.fromfile(cfg)
+# def get_model(cfg, ckp, transformers_model):
+#     # print(cfg)
+#     # print(type(cfg))
+#     cfg = mmcv.Config.fromfile(cfg)
 
-    cfg['model']['type'] = 'Mask2FormerVitForinfer2'
+#     cfg['model']['type'] = 'Mask2FormerVitForinfer2'
 
-    # cfg['model']['relationship_head']['pretrained_transformers'] = transformers_model
-    # cfg['model']['relationship_head']['cache_dir'] = './'    
-    # if 'entity_length' in cfg['model']['relationship_head'] and cfg['model']['relationship_head']['entity_length'] > 1:
-    #     cfg['model']['relationship_head']['entity_part_encoder'] = transformers_model
+#     # cfg['model']['relationship_head']['pretrained_transformers'] = transformers_model
+#     # cfg['model']['relationship_head']['cache_dir'] = './'    
+#     # if 'entity_length' in cfg['model']['relationship_head'] and cfg['model']['relationship_head']['entity_length'] > 1:
+#     #     cfg['model']['relationship_head']['entity_part_encoder'] = transformers_model
 
-    model = init_detector(cfg, ckp)
-    return model
+#     model = init_detector(cfg, ckp)
+#     return model
 
 def show_gt(image_id, flag_show_relation=False):
     psg_val_data_file = '/root/autodl-tmp/dataset/psg/psg_test.json'
@@ -156,14 +157,14 @@ def show_tokens_scores(tokens_scores, relation_res, entity_embedding):
 if __name__=="__main__":
 
     INSTANCE_OFFSET = 1000
-    cfg='configs/psg/v5_token_ablation_8_4.py'
+    cfg='configs/psg/v6_token_ablation_64_4.py'
     # cfg='configs/psg/v6.py'
-    ckp=None
-    # ckp='output/v5_token_ablation_8_4/latest.pth'
+    # ckp=None
+    ckp='output/v6_token_ablation_64_4/latest.pth'
     # ckp='output/v6/epoch_1.pth'
     image_id = 2364856
 
-    model = get_model(cfg, ckp, transformers_model=None)
+    model = get_model(cfg, ckp, mode='v6', transformers_model=None)
     model.eval()
     # 模拟输入数据（替换为你的实际数据）
     # image_name = '/root/autodl-tmp/dataset/coco/val2017/000000507015.jpg'
