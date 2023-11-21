@@ -16,69 +16,34 @@ baseline:
 recall@20=0.39004137958108615,mRecall=0.3683327252827435, classM=0.2594795896004595
 SGG eval:  R @ 20: 0.3657;  R @ 50: 0.4484;  R @ 100: 0.4879;  for mode=sgdet, type=Recall.
 SGG eval:  R @ 20: 0.4301;  R @ 50: 0.5268;  R @ 100: 0.5788;  for mode=phrdet, type=Recall.
-SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=sgdet, type=NoGraphConstraint @ 56 Recall.
-SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=phrdet, type=NoGraphConstraint @ 56 Recall.
 SGG eval:  mR @ 20: 0.2409;  mR @ 50: 0.3405;  mR @ 100: 0.3932;  for mode=sgdet, type=Mean Recall.
 SGG eval:  mR @ 20: 0.2902;  mR @ 50: 0.4029;  mR @ 100: 0.4691;  for mode=phrdet, type=Mean Recall.
 
-64_1
-param= 56.760576 recall@20=0.4050574810810105, mRecall=0.3793424317617866, classM=0.2555069620390836
-SGG eval:  R @ 20: 0.3563;  R @ 50: 0.4263;  R @ 100: 0.4653;  for mode=sgdet, type=Recall.
-SGG eval:  R @ 20: 0.4218;  R @ 50: 0.5082;  R @ 100: 0.5576;  for mode=phrdet, type=Recall.
-SGG eval:  mR @ 20: 0.2459;  mR @ 50: 0.3362;  mR @ 100: 0.4110;  for mode=sgdet, type=Mean Recall.
-SGG eval:  mR @ 20: 0.2900;  mR @ 50: 0.4084;  mR @ 100: 0.4894;  for mode=phrdet, type=Mean Recall.
-FPS = 9.362912068023835
-Flops: 90.86 GFLOPs
-Params: 54.53 M
 
 8_1
-param= 56.731848 recall@20=0.4074110493264905, mRecall=0.3838399503722084, classM=0.25771586103436916
 SGG eval:  R @ 20: 0.3551;  R @ 50: 0.4273;  R @ 100: 0.4669;  for mode=sgdet, type=Recall.
 SGG eval:  R @ 20: 0.4207;  R @ 50: 0.5095;  R @ 100: 0.5592;  for mode=phrdet, type=Recall.
 SGG eval:  mR @ 20: 0.2425;  mR @ 50: 0.3366;  mR @ 100: 0.4249;  for mode=sgdet, type=Mean Recall.
 SGG eval:  mR @ 20: 0.2833;  mR @ 50: 0.4086;  mR @ 100: 0.5036;  for mode=phrdet, type=Mean Recall.
-FPS = 9.325647369022894
 Flops: 90.86 GFLOPs
 Params: 54.5 M
+FPS: 16.902767713636724
 
-32_8
-param= 62.252775 recall@20=0.39831185587288526, mRecall=0.37127791563275436, classM=0.2407527423568981
-
-FPS = 9.106308203741765
-
-16_8
-param= 62.244567 recall@20=0.3926436560171854, mRecall=0.36879652605459057, classM=0.24582005957372804
-
-FPS = 8.920662161215139
-
-64_8
-param= 62.269191 recall@20=0.39752031546884486, mRecall=0.3737593052109181, classM=0.2655456698789494
-SGG eval:  R @ 20: 0.3590;  R @ 50: 0.4330;  R @ 100: 0.4714;  for mode=sgdet, type=Recall.
-SGG eval:  R @ 20: 0.4224;  R @ 50: 0.5133;  R @ 100: 0.5639;  for mode=phrdet, type=Recall.
-SGG eval:  mR @ 20: 0.2542;  mR @ 50: 0.3492;  mR @ 100: 0.4127;  for mode=sgdet, type=Mean Recall.
-SGG eval:  mR @ 20: 0.2943;  mR @ 50: 0.4205;  mR @ 100: 0.5012;  for mode=phrdet, type=Mean Recall.
+64_1
+SGG eval:  R @ 20: 0.3563;  R @ 50: 0.4263;  R @ 100: 0.4653;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4218;  R @ 50: 0.5082;  R @ 100: 0.5576;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2459;  mR @ 50: 0.3362;  mR @ 100: 0.4110;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2900;  mR @ 50: 0.4084;  mR @ 100: 0.4894;  for mode=phrdet, type=Mean Recall.
 Flops: 90.86 GFLOPs
-Params: 54.63 M
-
-66.545368
-recall@20=0.41649409882001953,mRecall=0.3948923750456038, classM=0.27471236513292613
-
-FPS = 9.417456664932923
-
-64_16
-param= 68.564751 recall@20=0.39923624635168753, mRecall=0.3743796526054591, classM=0.2639752326721995
-
-FPS = 9.060013921687538
-
-32_4
-param= 59.104995 recall@20=0.3991392766547178, mRecall=0.375, classM=0.2452944960971097
-
-FPS = 9.55704071118187
+Params: 54.53 M
+FPS: 16.57816725083277
 
 8_4
-param= 59.092683 recall@20=0.3971496274150686,mRecall=0.37127791563275436, classM=0.26904394937290044
-
-FPS = 9.31441337195211
+SGG eval:  R @ 20: 0.3541;  R @ 50: 0.4260;  R @ 100: 0.4658;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4199;  R @ 50: 0.5055;  R @ 100: 0.5553;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2378;  mR @ 50: 0.3345;  mR @ 100: 0.4082;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2770;  mR @ 50: 0.4035;  mR @ 100: 0.4867;  for mode=phrdet, type=Mean Recall.
+FPS: 16.316882162408277
 
 64_4
 param= 66.484948 recall@20=0.413440448995314,mRecall=0.39190076614374314, classM=0.26718310762622005
@@ -86,3 +51,31 @@ SGG eval:  R @ 20: 0.3554;  R @ 50: 0.4288;  R @ 100: 0.4680;  for mode=sgdet, t
 SGG eval:  R @ 20: 0.4214;  R @ 50: 0.5111;  R @ 100: 0.5613;  for mode=phrdet, type=Recall.
 SGG eval:  mR @ 20: 0.2369;  mR @ 50: 0.3367;  mR @ 100: 0.4178;  for mode=sgdet, type=Mean Recall.
 SGG eval:  mR @ 20: 0.2803;  mR @ 50: 0.4021;  mR @ 100: 0.4993;  for mode=phrdet, type=Mean Recall.
+FPS:15.830977573539165
+
+32_8
+SGG eval:  R @ 20: 0.3577;  R @ 50: 0.4280;  R @ 100: 0.4678;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4210;  R @ 50: 0.5075;  R @ 100: 0.5591;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2406;  mR @ 50: 0.3335;  mR @ 100: 0.4207;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2851;  mR @ 50: 0.4070;  mR @ 100: 0.5050;  for mode=phrdet, type=Mean Recall.
+FPS: 15.226064901461756
+
+64_8
+SGG eval:  R @ 20: 0.3590;  R @ 50: 0.4330;  R @ 100: 0.4714;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4224;  R @ 50: 0.5133;  R @ 100: 0.5639;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2542;  mR @ 50: 0.3492;  mR @ 100: 0.4127;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2943;  mR @ 50: 0.4205;  mR @ 100: 0.5012;  for mode=phrdet, type=Mean Recall.
+Flops: 90.86 GFLOPs
+Params: 54.63 M
+FPS: 16.242365242702114
+14.367439015258459
+
+64_16
+SGG eval:  R @ 20: 0.3566;  R @ 50: 0.4298;  R @ 100: 0.4682;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4214;  R @ 50: 0.5102;  R @ 100: 0.5598;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2468;  mR @ 50: 0.3460;  mR @ 100: 0.4163;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2900;  mR @ 50: 0.4086;  mR @ 100: 0.4977;  for mode=phrdet, type=Mean Recall.
+FPS: 15.573735932879464
+14.129588785328822
+13.7455894160996
+

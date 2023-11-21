@@ -21,6 +21,14 @@ from mmdet.evaluation import sgg_evaluation
 
 from util import CLASSES, PREDICATES, get_colormap, write_json, load_json, read_image, Result, get_ann_info
 
+from mmcv import Config, DictAction
+
+from mmdet.models import build_detector
+
+import torch
+
+import time
+
 def test_matrics(
         cfg,
         ckp,
@@ -808,91 +816,55 @@ def show_gt(img,
         mmcv.imwrite(output_viz_graph, osp.join(
             out_dir, '{}.jpg'.format(i)))
 
+def testFPS(config):
+    # ori_shape = (3, h, w)
+    # divisor = args.size_divisor
+    # if divisor > 0:
+    #     h = int(np.ceil(h / divisor)) * divisor
+    #     w = int(np.ceil(w / divisor)) * divisor
+
+    cfg = Config.fromfile(config)
+    model = build_detector(
+        cfg.model,
+        train_cfg=cfg.get('train_cfg'),
+        test_cfg=cfg.get('test_cfg'))
+    model.cuda()
+    model.eval()
+
+    input_shape = (3, 640, 640)
+    batch = torch.ones(()).new_empty((1, *input_shape), dtype=next(model.parameters()).dtype, device=next(model.parameters()).device)
+
+    start_time = time.time()
+    for i in range(100):
+        _ = model.forward_dummy(batch)
+    end_time = time.time()
+    print(1/((end_time - start_time)/100))
 
 
 if __name__ == '__main__':
-    # get_tra_val_test_list()
-    # get_test_p()
-    # reCall = True
-    # recallK = 20
+    
+    cfg='configs/psg/v6_token_ablation_8_1.py'
+    # cfg='configs/psg/v6.py'
+    ckp='output/v6_token_ablation_64_1/latest.pth'
+    # ckp='output/v6/epoch_12.pth'
+    mode='v6'
+    testFPS(cfg)
+    exit(0)
 
-    # get_val_p(
-    #     recallK,
-    #     mode='v0',
-    #     cfg='configs/psg/v6_token_ablation_64_4.py',
-    #     # cfg='configs/psg/v6.py',
-    #     ckp='output/v6_token_ablation_64_4/latest.pth',
-    #     # ckp='output/v6/latest.pth',
-    #     val_mode_output_dir='submit/val_v5_latest',
-    #     test_mode_output_dir='submit',
-    #     # psg_all_data_file='/root/autodl-tmp/dataset/psg/psg_val.json',
-    #     psg_all_data_file='/root/autodl-tmp/dataset/psg/psg_test.json',
-    #     psg_tra_data_file='/root/autodl-tmp/dataset/psg/psg_train_val.json',
-    #     psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json',
-    #     img_dir='/root/autodl-tmp/dataset/coco',
-    #     transformers_model='/root/autodl-tmp/psg/mfpsg/checkpoints/chinese-roberta-wwm-ext',
-    # )
-    # psg_dataset_file = load_json(psg_all_data_file)
-    # # print('keys: ', list(psg_dataset_file.keys()))
-
-    # psg_dataset_file = load_json('/root/autodl-tmp/dataset/psg/psg.json')
-    # psg_thing_cats = psg_dataset_file['thing_classes']
-    # psg_stuff_cats = psg_dataset_file['stuff_classes']
-    # psg_obj_cats = psg_thing_cats + psg_stuff_cats
-
-    # # psg_dataset = {d["image_id"]: d for d in psg_dataset_file['data']}
-    # model = get_model('configs/psg/v5.py', 'output/v5/epoch_12.pth', transformers_model=None)
-    # test_images = ["166-img.jpg",
-    #         "285-img.jpg",
-    #         "668-img.jpg",
-    #         "1340-img.jpg",
-    #         "1776-img.jpg",
-    #         "2393-img.jpg",
-    #         "2578-img.jpg"
-    # ]
-    # for file_name in tqdm(test_images):
-    # # # img_id = random.choice()
-    #     # data = psg_dataset[img_id]
-    #     # file_name = data['file_name']
-
-    #     show_result(
-    #         # mode='v0',
-    #         model = model,
-    #         # cfg='configs/psg/v5.py',
-    #         # ckp='output/v5/epoch_12.pth',
-    #         # val_mode_output_dir='submit/val_v0_latest',
-    #         # test_mode_output_dir='submit',
-
-    #         # psg_all_data_file='/root/autodl-tmp/dataset/psg/psg.json',
-    #         # psg_tra_data_file='/root/autodl-tmp/dataset/psg/psg_train_val.json',
-    #         # psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json',
-    #         img='/root/autodl-tmp/psg/mfpsg/test/image/'+file_name,
-    #         # transformers_model=None,
-    #         out_dir="/root/autodl-tmp/psg/mfpsg/test/result/{}/".format(file_name),
-    #     )
-
-    # landmark
-    # best v1 ep30 31.3
-    # v4 ep30 32.36
-    # v5 ep30 31.94
-
+    # 测试
     test_matrics(
-        # cfg='configs/psg/v6_token_ablation_64_4.py',
-        # cfg='configs/psg/v2.py',
-        # ckp='output/v6_token_ablation_64_4/latest.pth',
-        # ckp='output/v2/latest.pth',
-        mode='v6',
+        cfg = cfg,
+        ckp = ckp,
+        mode = mode
     )
     
-    # get_val_p(
-    #     # cfg='configs/psg/v6_token_ablation_64_4.py',
-    #     cfg='configs/psg/v6.py',
-    #     # ckp='output/v6_token_ablation_64_4/latest.pth',
-    #     ckp='output/v6/latest.pth',
-    #     mode='v6',
-    #     val_mode_output_dir='submit/val_v6_latest',
-    # )
-
+    # 获取提交的submit
+    get_val_p(
+        cfg = cfg,
+        ckp = ckp,
+        mode = mode,
+        val_mode_output_dir='submit/val_v6_latest',
+    )
 
 
 

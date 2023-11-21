@@ -2,12 +2,12 @@ import numpy as np
 import json
 from detectron2.utils.colormap import colormap
 from PIL import Image
+import PIL
 from detectron2.utils.visualizer import VisImage, Visualizer
 import mmcv
 from typing import Tuple
 import os.path as osp
 import random
-
 CLASSES = [
     'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
     'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign',
@@ -27,11 +27,11 @@ CLASSES = [
     'playingfield', 'railroad', 'river', 'road', 'roof', 'sand', 'sea',
     'shelf', 'snow', 'stairs', 'tent', 'towel', 'wall-brick', 'wall-stone',
     'wall-tile', 'wall-wood', 'water-other', 'window-blind', 'window-other',
-    'tree-merged', 'fence-merged', 'ceiling-merged', 'sky-other-merged',
+    'tree', 'fence-merged', 'ceiling-merged', 'sky-other-merged',
     'cabinet-merged', 'table-merged', 'floor-other-merged', 'pavement-merged',
     'mountain-merged', 'grass-merged', 'dirt-merged', 'paper-merged',
     'food-other-merged', 'building-other-merged', 'rock-merged',
-    'wall-other-merged', 'rug-merged', 'background'
+    'wall', 'rug-merged', 'background'
 ]
 
 PREDICATES = [
@@ -313,8 +313,15 @@ def convert_PIL_to_numpy(image, format):
     return image
 
 
-def show_relations(relations, img, rel_obj_labels, masks, colormap_coco, out_dir):
+def show_relations(relations, image_name, rel_obj_labels, masks, out_dir):
+    img = mmcv.imread(image_name)
+    img = PIL.Image.fromarray(img)
+    converter = PIL.ImageEnhance.Color(img)
+    img = converter.enhance(0.01)
     img_w, img_h = img.size
+
+    colormap_coco = get_colormap(len(masks))
+    colormap_coco = (np.array(colormap_coco) / 255).tolist()
 
     n_rels = len(relations)
 
@@ -402,8 +409,9 @@ def draw_text(
     color: Tuple[float, float, float] = [0, 0, 0],
     size: float = 10,
     padding: float = 5,
-    box_color: str = 'black',
-    font: str = None,
+    box_color: str = 'white',
+    fontweight: str = None,
+    return_height = False
 ) -> float:
     text_obj = viz_img.ax.text(
         x,
@@ -422,10 +430,12 @@ def draw_text(
         color=color,
         zorder=10,
         rotation=0,
+        fontweight=fontweight,
     )
     viz_img.get_image()
     text_dims = text_obj.get_bbox_patch().get_extents()
-
+    if return_height:
+        return text_dims.width, text_dims.height
     return text_dims.width
 
 

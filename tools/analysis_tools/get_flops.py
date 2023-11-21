@@ -15,7 +15,7 @@ except ImportError:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('--config', default='configs/psg/v6_token_ablation_64_4.py', help='train config file path')
+    parser.add_argument('--config', default='configs/psg/v6_token_ablation_32_8.py', help='train config file path')
     parser.add_argument(
         '--shape',
         type=int,
@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument(
         '--size-divisor',
         type=int,
-        default=32,
+        default=-1,
         help='Pad the input image, the minimum size that is divisible '
         'by size_divisor, -1 means do not pad the image.')
     args = parser.parse_args()
