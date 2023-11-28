@@ -109,13 +109,13 @@ def show_relation(gt_relation, gt_label, colormap_coco, gt=False):
         # box_color = 'white'
         # font = 18
         fontweight = 'normal'
-        if not gt and index in [0,1,10,15,19]:
-            # box_color = 'pink'
-            # font = 36
-            fontweight = 'semibold'
-            # pass
-        if gt and index == 2:
-            continue
+        # if not gt and index in [0,1,10,15,19]:
+        #     # box_color = 'pink'
+        #     # font = 36
+        #     fontweight = 'semibold'
+        #     # pass
+        # if gt and index == 2:
+        #     continue
         s_idx, o_idx, rel_label_id = r
         s_label = gt_label[s_idx]
         o_label = gt_label[o_idx]
@@ -186,8 +186,8 @@ def show_result(pan_results, image_name, out_file_name, image_id, relations):
         object_masks.append(mask)
         label_pre.append(instance_id % INSTANCE_OFFSET)
         # labels.append(CLASSES[instance_id % INSTANCE_OFFSET])
-    # list_gt = [7,9,3,4,1,0,6,8,2,5]
-    list_gt = [5, 2, 3, 1, 0, 4]
+    list_gt = [7,9,3,4,1,0,6,8,2,5]
+    # list_gt = [5, 2, 3, 1, 0, 4]
     
     colormap_coco = get_colormap(len(object_masks))
     colormap_coco = (np.array(colormap_coco) / 255).tolist()
@@ -340,7 +340,7 @@ if __name__=="__main__":
     # ckp=None
     # ckp='output/v6_token_ablation_64_4/latest.pth'
     ckp='output/v6/epoch_12.pth'
-    image_id = 2316037
+    image_id = 2364856
 
     model = get_model(cfg, ckp, mode='v6', transformers_model=None)
     model.eval()

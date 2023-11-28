@@ -1,9 +1,9 @@
-_base_ = ['./v5.py']
+_base_ = ['./v2.py']
 # pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'  # noqa
 
 depths = [2, 2, 6, 2]
 model = dict(
-    type='Mask2FormerVit2',
+    type='Mask2FormerRelation',
     backbone=dict(
         _delete_=True,
         type='SwinTransformer',
@@ -25,7 +25,7 @@ model = dict(
         # init_cfg=dict(type='Pretrained', checkpoint=pretrained)
         ),
     panoptic_head=dict(
-        type='Mask2FormerVitHead2', in_channels=[96, 192, 384, 768]),
+        type='Mask2FormerRelationHead', in_channels=[96, 192, 384, 768]),
     init_cfg=None)
 
 # set all layers in backbone to lr_mult=0.1
@@ -64,6 +64,6 @@ optimizer = dict(
 
 load_from = '/root/autodl-tmp/psg/mfpsg/checkpoints/mask2former_swin-t-p4-w7-224_lsj_8x2_50e_coco-panoptic_20220326_224553-fc567107.pth'
 
-work_dir = '/root/autodl-tmp/psg/mfpsg/output/v5_swin-t'
-resume_from = '/root/autodl-tmp/psg/mfpsg/output/v5_swin-t/latest.pth'
-# resume_from = None
+work_dir = '/root/autodl-tmp/psg/mfpsg/output/v2_swin-t'
+# resume_from = '/root/autodl-tmp/psg/mfpsg/output/v5_swin-t/latest.pth'
+resume_from = None

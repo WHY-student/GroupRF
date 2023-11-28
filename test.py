@@ -48,6 +48,9 @@ if __name__=="__main__":
             psg_val_data.append(d)
     write_json({"data":psg_val_data}, '/root/autodl-tmp/dataset/psg/psg_val.json')
 
+    # relation_feature, all_edge_lbl, bs_size = concat_relation_features(object_feature_list, group_token, target_relation)
+
+
     # pass
     
     # for i in range(1000):

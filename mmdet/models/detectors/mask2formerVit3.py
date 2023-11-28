@@ -95,10 +95,10 @@ class Mask2FormerVit3(Mask2FormerRelation):
         
         relation_pred, all_edge_lbl, bs_size = self.relationship_head.forward_train(query_feat, pos_inds_list, pos_assigned_gt_inds_list, img_metas)
 
+        losses_relation = {}
         # print(relation_pred.shape,all_edge_lbl.shape)
 
         # exit(0)
-        losses_relation = {}
         losses_relation['loss_relationship'] = self.relationship_head.loss(relation_pred, all_edge_lbl)
         
         recall = self.get_recall_N(relation_pred, all_edge_lbl, bs_size, img_metas)

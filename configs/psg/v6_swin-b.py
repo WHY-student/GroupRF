@@ -44,9 +44,9 @@ optimizer = dict(
 
 load_from = '/root/autodl-tmp/psg/mfpsg/checkpoints/mask2former_swin-b-p4-w12-384_lsj_8x2_50e_coco-panoptic_20220331_002244-c149a9e9.pth'
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=2,
+    samples_per_gpu=3,
+    workers_per_gpu=4,
 )
 work_dir = '/root/autodl-tmp/psg/mfpsg/output/v6_swin-b'
-# resume_from = '/root/autodl-tmp/psg/mfpsg/output/v5_swin-b/latest.pth'
-resume_from = None
+resume_from = '/root/autodl-tmp/psg/mfpsg/output/v6_swin-b/latest.pth'
+# resume_from = None

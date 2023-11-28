@@ -8,6 +8,7 @@ import mmcv
 from typing import Tuple
 import os.path as osp
 import random
+
 CLASSES = [
     'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
     'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign',
@@ -27,7 +28,7 @@ CLASSES = [
     'playingfield', 'railroad', 'river', 'road', 'roof', 'sand', 'sea',
     'shelf', 'snow', 'stairs', 'tent', 'towel', 'wall-brick', 'wall-stone',
     'wall-tile', 'wall-wood', 'water-other', 'window-blind', 'window-other',
-    'tree', 'fence-merged', 'ceiling-merged', 'sky-other-merged',
+    'tree', 'fence', 'ceiling-merged', 'sky-other-merged',
     'cabinet-merged', 'table-merged', 'floor-other-merged', 'pavement-merged',
     'mountain-merged', 'grass-merged', 'dirt-merged', 'paper-merged',
     'food-other-merged', 'building-other-merged', 'rock-merged',
