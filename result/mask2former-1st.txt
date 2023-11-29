@@ -89,6 +89,12 @@ SGG eval:  R @ 20: 0.4404;  R @ 50: 0.5373;  R @ 100: 0.5936;  for mode=phrdet, 
 SGG eval:  mR @ 20: 0.2683;  mR @ 50: 0.3682;  mR @ 100: 0.4643;  for mode=sgdet, type=Mean Recall.
 SGG eval:  mR @ 20: 0.3087;  mR @ 50: 0.4279;  mR @ 100: 0.5436;  for mode=phrdet, type=Mean Recall.
 
+SGG eval:  R @ 20: 0.3881;  R @ 50: 0.4746;  R @ 100: 0.5195;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4488;  R @ 50: 0.5500;  R @ 100: 0.6068;  for mode=phrdet, type=Recall.
+SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=sgdet, type=NoGraphConstraint @ 56 Recall.
+SGG eval:  R @ 20: nan;  R @ 50: nan;  R @ 100: nan;  for mode=phrdet, type=NoGraphConstraint @ 56 Recall.
+SGG eval:  mR @ 20: 0.2586;  mR @ 50: 0.3474;  mR @ 100: 0.4125;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.3044;  mR @ 50: 0.4042;  mR @ 100: 0.4809;  for mode=phrdet, type=Mean Recall.
 
 our_swin_t
 SGG eval:  R @ 20: 0.3682;  R @ 50: 0.4476;  R @ 100: 0.4915;  for mode=sgdet, type=Recall.
