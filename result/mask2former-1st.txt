@@ -79,3 +79,26 @@ FPS: 15.573735932879464
 14.129588785328822
 13.7455894160996
 
+
+baseline_swin_b
+
+
+our_swin_b
+SGG eval:  R @ 20: 0.3741;  R @ 50: 0.4583;  R @ 100: 0.5029;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4404;  R @ 50: 0.5373;  R @ 100: 0.5936;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2683;  mR @ 50: 0.3682;  mR @ 100: 0.4643;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.3087;  mR @ 50: 0.4279;  mR @ 100: 0.5436;  for mode=phrdet, type=Mean Recall.
+
+
+our_swin_t
+SGG eval:  R @ 20: 0.3682;  R @ 50: 0.4476;  R @ 100: 0.4915;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4321;  R @ 50: 0.5279;  R @ 100: 0.5810;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2550;  mR @ 50: 0.3584;  mR @ 100: 0.4531;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2996;  mR @ 50: 0.4205;  mR @ 100: 0.5348;  for mode=phrdet, type=Mean Recall.
+
+baseline_swin_t
+
+SGG eval:  R @ 20: 0.3754;  R @ 50: 0.4627;  R @ 100: 0.5071;  for mode=sgdet, type=Recall.
+SGG eval:  R @ 20: 0.4359;  R @ 50: 0.5370;  R @ 100: 0.5925;  for mode=phrdet, type=Recall.
+SGG eval:  mR @ 20: 0.2481;  mR @ 50: 0.3455;  mR @ 100: 0.4153;  for mode=sgdet, type=Mean Recall.
+SGG eval:  mR @ 20: 0.2930;  mR @ 50: 0.3999;  mR @ 100: 0.4858;  for mode=phrdet, type=Mean Recall.

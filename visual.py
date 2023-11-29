@@ -45,7 +45,12 @@ def show_gt(image_id, flag_show_relation=False):
             seg_map = read_image(os.path.join(img_dir, d["pan_seg_file_name"]), format="RGB")
             seg_map = rgb2id(seg_map)
 
-            gt_relation = d["relations"]
+            raw_realtion = d["relations"]
+            gt_relation = []
+            for r in raw_realtion:
+                if r in gt_relation:
+                    continue
+                gt_relation.append(r)
             #get category ids
             gt_category_ids = []
             gt_label = []

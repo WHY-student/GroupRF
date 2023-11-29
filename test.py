@@ -31,22 +31,24 @@ def get_tra_val_test_list(psg_tra_data_file, psg_val_data_file):
 
 import torch
 import time
-
+from util import get_colormap
 
 if __name__=="__main__":
-    psg_all_data_file='/root/autodl-tmp/dataset/psg/psg.json'
-    psg_tra_data_file = '/root/autodl-tmp/dataset/psg/psg_train_val.json'
-    psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json'
-    tra_id_list, val_id_list, test_id_list = get_tra_val_test_list(
-        psg_tra_data_file=psg_tra_data_file,
-        psg_val_data_file=psg_val_data_file,
-    )
-    psg_all_data = load_json(psg_all_data_file)
-    psg_val_data = []
-    for d in tqdm(psg_all_data['data']):
-        if d['image_id'] in val_id_list:
-            psg_val_data.append(d)
-    write_json({"data":psg_val_data}, '/root/autodl-tmp/dataset/psg/psg_val.json')
+    colormap = get_colormap(10)
+    print(colormap)
+    # psg_all_data_file='/root/autodl-tmp/dataset/psg/psg.json'
+    # psg_tra_data_file = '/root/autodl-tmp/dataset/psg/psg_train_val.json'
+    # psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json'
+    # tra_id_list, val_id_list, test_id_list = get_tra_val_test_list(
+    #     psg_tra_data_file=psg_tra_data_file,
+    #     psg_val_data_file=psg_val_data_file,
+    # )
+    # psg_all_data = load_json(psg_all_data_file)
+    # psg_val_data = []
+    # for d in tqdm(psg_all_data['data']):
+    #     if d['image_id'] in val_id_list:
+    #         psg_val_data.append(d)
+    # write_json({"data":psg_val_data}, '/root/autodl-tmp/dataset/psg/psg_val.json')
 
     # relation_feature, all_edge_lbl, bs_size = concat_relation_features(object_feature_list, group_token, target_relation)
 
