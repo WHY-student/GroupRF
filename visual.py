@@ -191,7 +191,7 @@ def show_result(pan_results, image_name, out_file_name, image_id, relations):
         object_masks.append(mask)
         label_pre.append(instance_id % INSTANCE_OFFSET)
         # labels.append(CLASSES[instance_id % INSTANCE_OFFSET])
-    list_gt = [7,9,3,4,1,0,6,8,2,5]
+    # list_gt = [7,9,3,4,1,0,6,8,2,5]
     # list_gt = [5, 2, 3, 1, 0, 4]
     
     colormap_coco = get_colormap(len(object_masks))
@@ -200,11 +200,12 @@ def show_result(pan_results, image_name, out_file_name, image_id, relations):
     # ids = np.unique(pan_results)[::-1]
     # labels = np.array([id % INSTANCE_OFFSET for id in ids], dtype=np.int64)
     labels = [CLASSES[l] for l in label_pre]
-    labels = [ labels[gt] for gt in list_gt]
-    object_masks = [ object_masks[gt] for gt in list_gt]
-    new_relations = []
-    for r in relations:
-        new_relations.append([list_gt.index(r[0]), list_gt.index(r[1]), r[2]])
+    # labels = [ labels[gt] for gt in list_gt]
+    # object_masks = [ object_masks[gt] for gt in list_gt]
+    # new_relations = []
+    # for r in relations:
+    #     new_relations.append([list_gt.index(r[0]), list_gt.index(r[1]), r[2]])
+    new_relations = relations
 
     # Viualize masks
     img = mmcv.imread(image_name)
@@ -345,7 +346,7 @@ if __name__=="__main__":
     # ckp=None
     # ckp='output/v6_token_ablation_64_4/latest.pth'
     ckp='output/v6/epoch_12.pth'
-    image_id = 2364856
+    image_id = 285707
 
     model = get_model(cfg, ckp, mode='v6', transformers_model=None)
     model.eval()

@@ -532,7 +532,7 @@ class MaskFormerFusionHead2(MaskFormerFusionHead):
                 mask_cls_result, mask_pred_result)
             # result['pan_results'] = pan_results
             result['entityid_list'] = entityid_list
-            # result['entity_score_list'] = entity_score_list
+            result['entity_score_list'] = entity_score_list
             result['target_keep'] = target_keep
             # result['object_mask'] = pre_mask
 

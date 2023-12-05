@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 @HEADS.register_module()
-class rlnGroupToken(BaseModule):
+class rlnGroupToken2(BaseModule):
     def __init__(
         self, 
         mlp_ratio=4.,
@@ -95,7 +95,8 @@ class rlnGroupToken(BaseModule):
             num_input_token = num_output_token
         
         self.norm = norm_layer(embed_dim)
-        
+        self.object_cls = 133
+        self.embed_dim = embed_dim
         self.num_cls = 56
         self.token_num = num_output_groups[-1]
         self.relation_embedding = Mlp(3*embed_dim,feed_forward, self.num_cls+1)
@@ -183,7 +184,7 @@ class rlnGroupToken(BaseModule):
 
     def simple_test(self,
         query_feat,
-        target_keep,
+        entity_embedding,
         visual=False
     ):
         temp_group_token = None
@@ -211,7 +212,6 @@ class rlnGroupToken(BaseModule):
         # plt.savefig('token_cos.png')
 
         # exit(0)
-        entity_embedding = query_feat[0][target_keep,:]
 
         relation_feature, neg_idx = concat_relation_features_test(entity_embedding, group_token)
         relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))

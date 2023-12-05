@@ -22,7 +22,7 @@ from ..utils.group_token import Mlp
 
 
 @DETECTORS.register_module()
-class Mask2FormerVit3(Mask2FormerRelation):
+class Mask2FormerVit(Mask2FormerRelation):
     r"""Implementation of `Masked-attention Mask
     Transformer for Universal Image Segmentation
     <https://arxiv.org/pdf/2112.01527>`_."""
@@ -47,7 +47,12 @@ class Mask2FormerVit3(Mask2FormerRelation):
             test_cfg=test_cfg,
             init_cfg=init_cfg)
         self.relationship_head = build_head(relationship_head)
-        
+
+        # self.rela_cls_embed = nn.Embedding(self.relationship_head.object_cls, self.relationship_head.embed_dim)
+        # self.use_background_feature = False
+        # self.entity_length = 1
+        # self.embedding_add_cls=True,
+        # self.cls_embedding_mode = 'add'
         
     
     # @AvoidCUDAOOM.retry_if_cuda_oom
@@ -88,10 +93,39 @@ class Mask2FormerVit3(Mask2FormerRelation):
         super(SingleStageDetector, self).forward_train(img, img_metas)
         x = self.extract_feat(img)
 
-        losses, query_feat, pos_inds_list, pos_assigned_gt_inds_list  = self.panoptic_head.forward_train(x, img_metas, gt_bboxes,
+        losses, mask_features, query_feat, pos_inds_list, pos_assigned_gt_inds_list  = self.panoptic_head.forward_train(x, img_metas, gt_bboxes,
                                                   gt_labels, gt_masks,
                                                   gt_semantic_seg,
                                                   gt_bboxes_ignore)
+
+        # # 向特征中添加背景信息
+        # relationship_input_embedding = []
+        # relationship_target = []
+        # num_imgs = len(img_metas)
+        # for idx in range(num_imgs):
+        #     embedding, target_relationship = self._get_entity_embedding_and_target(
+        #         mask_features[idx],
+        #         img_metas[idx],
+        #         gt_masks[idx],
+        #         gt_labels[idx],
+        #         gt_semantic_seg[idx],
+        #     )
+        #     relationship_input_embedding.append(embedding)
+        #     relationship_target.append(target_relationship)
+        # max_length = max([e.shape[1] for e in relationship_input_embedding])
+        # mask_attention = mask_features.new_zeros([num_imgs, max_length])
+        # for idx in range(num_imgs):
+        #     mask_attention[idx, :relationship_input_embedding[idx].shape[1]] = 1.
+        # relationship_input_embedding = [
+        #     F.pad(e, [0, 0, 0, max_length-e.shape[1]])
+        #     for e in relationship_input_embedding
+        # ]
+        # relationship_target = [
+        #     F.pad(t, [0, max_length-t.shape[3], 0, max_length-t.shape[2]])
+        #     for t in relationship_target
+        # ]
+        # relationship_input_embedding = torch.cat(relationship_input_embedding, dim=0)
+        # relationship_target = torch.cat(relationship_target, dim=0)
         
         relation_pred, all_edge_lbl, bs_size = self.relationship_head.forward_train(query_feat, pos_inds_list, pos_assigned_gt_inds_list, img_metas)
 
@@ -165,6 +199,58 @@ class Mask2FormerVit3(Mask2FormerRelation):
         res['pan_results'] = res['pan_results'].detach().cpu().numpy()
 
         return [res]
+
+    def get_entity_embedding(self, pan_result, entity_id_list, entity_score_list, feature_map, meta):
+        device = feature_map.device
+        dtype = feature_map.dtype
+
+        ori_height, ori_width = meta['ori_shape'][:2]
+        resize_height, resize_width = meta['img_shape'][:2]
+        pad_height, pad_width = meta['pad_shape'][:2]
+
+        mask_list = []
+        class_mask_list = []
+        instance_id_all = entity_id_list
+        for idx_instance, instance_id in enumerate(instance_id_all):
+            if instance_id == 133:
+                continue
+            mask = pan_result == instance_id
+            class_mask = instance_id % INSTANCE_OFFSET
+            # class_score = entity_score_list[idx_instance]
+            mask_list.append(mask)
+            class_mask_list.append(class_mask)
+
+        if len(mask_list) == 0:
+            return None
+        
+        class_mask_tensor = torch.tensor(class_mask_list).to(device).to(torch.long)[None]
+        cls_entity_embedding = self.rela_cls_embed(class_mask_tensor)
+
+        mask_tensor = torch.stack(mask_list)[None]
+        mask_tensor = (mask_tensor * 1).to(dtype)
+        h_img, w_img = resize_height, resize_width
+        mask_tensor = F.interpolate(mask_tensor, size=(h_img, w_img))
+        h_pad, w_pad = pad_height, pad_width
+        mask_tensor = F.pad(mask_tensor, (0, w_pad-w_img, 0, h_pad-h_img))
+        h_feature, w_feature = feature_map.shape[-2:]
+        mask_tensor = F.interpolate(mask_tensor, size=(h_feature, w_feature))
+        mask_tensor = mask_tensor[0][:, None]
+
+        # feature_map [bs, 256, h, w]
+        # mask_tensor [n, 1, h, w]
+        entity_embedding = (feature_map * mask_tensor).sum(dim=[2, 3]) / (mask_tensor.sum(dim=[2, 3]) + 1e-8)
+        entity_embedding = entity_embedding[None]
+        entity_embedding = entity_embedding + cls_entity_embedding
+
+        pos_embed_zeros = feature_map[0].new_zeros((1, ) + feature_map[0].shape[-2:])
+        pos_embed = self.relationship_head.postional_encoding_layer(pos_embed_zeros)
+        for idx in range(entity_embedding.shape[1]):
+            pos_embed_mask_pooling = self._mask_pooling(pos_embed[0], mask_tensor[idx], output_size=self.entity_length)
+            entity_embedding[0, idx] = entity_embedding[0, idx] + pos_embed_mask_pooling
+
+        # entity_embedding [1, n, 256]
+        return entity_embedding, entity_id_list, entity_score_list
+
 
     def forward_dummy(self, imgs, img_metas=None):
         """Used for computing network flops. See
@@ -296,100 +382,7 @@ class Mask2FormerVit3(Mask2FormerRelation):
 
 
 @DETECTORS.register_module()
-class Mask2FormerVitForinfer3(Mask2FormerVit3):
-    def get_entity_embedding(self, pan_result, entity_id_list, entity_score_list, feature_map, meta):
-        device = feature_map.device
-        dtype = feature_map.dtype
-
-        ori_height, ori_width = meta['ori_shape'][:2]
-        resize_height, resize_width = meta['img_shape'][:2]
-        pad_height, pad_width = meta['pad_shape'][:2]
-
-        mask_list = []
-        class_mask_list = []
-        instance_id_all = entity_id_list
-        for idx_instance, instance_id in enumerate(instance_id_all):
-            if instance_id == 133:
-                continue
-            mask = pan_result == instance_id
-            class_mask = instance_id % INSTANCE_OFFSET
-            # class_score = entity_score_list[idx_instance]
-            mask_list.append(mask)
-            class_mask_list.append(class_mask)
-
-        if len(mask_list) == 0:
-            return None
-        
-        class_mask_tensor = torch.tensor(class_mask_list).to(device).to(torch.long)[None]
-        cls_entity_embedding = self.rela_cls_embed(class_mask_tensor)
-
-        mask_tensor = torch.stack(mask_list)[None]
-        mask_tensor = (mask_tensor * 1).to(dtype)
-        h_img, w_img = resize_height, resize_width
-        mask_tensor = F.interpolate(mask_tensor, size=(h_img, w_img))
-        h_pad, w_pad = pad_height, pad_width
-        mask_tensor = F.pad(mask_tensor, (0, w_pad-w_img, 0, h_pad-h_img))
-        h_feature, w_feature = feature_map.shape[-2:]
-        mask_tensor = F.interpolate(mask_tensor, size=(h_feature, w_feature))
-        mask_tensor = mask_tensor[0][:, None]
-
-        # feature_map [bs, 256, h, w]
-        # mask_tensor [n, 1, h, w]
-        if self.entity_length > 1:
-            entity_embedding_list = []
-            for idx in range(len(mask_list)):
-                # embedding [self.entity_length, 256]
-                embedding = self._mask_pooling(feature_map[0], mask_tensor[idx], self.entity_length)
-                embedding = embedding + cls_entity_embedding[0, idx:idx+1]
-
-                if self.add_postional_encoding:
-                    # [1, h, w]
-                    pos_embed_zeros = feature_map[0].new_zeros((1, ) + feature_map[0].shape[-2:])
-                    # [1, 256, h, w]
-                    pos_embed = self.relationship_head.postional_encoding_layer(pos_embed_zeros)
-                    pos_embed_mask_pooling = self._mask_pooling(pos_embed[0], mask_tensor[idx], output_size=self.entity_length)
-                    embedding = embedding + pos_embed_mask_pooling
-
-
-                if self.use_background_feature:
-                    background_embedding = self._mask_pooling(feature_map[0], 1 - mask_tensor[idx], self.entity_length)
-                    embedding = embedding + background_embedding
-
-                
-                entity_embedding_list.append(embedding[None])
-
-            # embedding [1, n*self.entity_length, 256]
-            embedding = torch.cat(entity_embedding_list, dim=1)
-            # entity_embedding [1, n, 256]
-            entity_embedding = self._entity_encode(embedding)
-
-        else:
-            entity_embedding = (feature_map * mask_tensor).sum(dim=[2, 3]) / (mask_tensor.sum(dim=[2, 3]) + 1e-8)
-            entity_embedding = entity_embedding[None]
-            if self.cls_embedding_mode == 'cat':
-                entity_embedding = torch.cat([entity_embedding, cls_entity_embedding], dim=-1)
-            elif self.cls_embedding_mode == 'add':
-                entity_embedding = entity_embedding + cls_entity_embedding
-
-
-            if self.add_postional_encoding:
-                pos_embed_zeros = feature_map[0].new_zeros((1, ) + feature_map[0].shape[-2:])
-                pos_embed = self.relationship_head.postional_encoding_layer(pos_embed_zeros)
-                for idx in range(entity_embedding.shape[1]):
-                    pos_embed_mask_pooling = self._mask_pooling(pos_embed[0], mask_tensor[idx], output_size=self.entity_length)
-                    entity_embedding[0, idx] = entity_embedding[0, idx] + pos_embed_mask_pooling
-
-
-            if self.use_background_feature:
-                background_mask = 1 - mask_tensor
-                background_feature = (feature_map * background_mask).sum(dim=[2, 3]) / (background_mask.sum(dim=[2, 3]) + 1e-8)
-                background_feature = background_feature[None]
-                # entity_embedding [1, n, 256]
-                # entity_embedding = entity_embedding + background_feature
-                entity_embedding = self.relu(entity_embedding + background_feature) - (entity_embedding - background_feature)**2
-
-        # entity_embedding [1, n, 256]
-        return entity_embedding, entity_id_list, entity_score_list
+class Mask2FormerVitForinfer(Mask2FormerVit):
 
     def simple_test(self, imgs, img_metas=None, **kwargs):
         if img_metas==None:
@@ -404,10 +397,11 @@ class Mask2FormerVitForinfer3(Mask2FormerVit3):
         res = results[0]
         # pan_results = res['pan_results']
         entityid_list = res['entityid_list']
-        entity_score_list = res['entity_score_list']
+        # entity_score_list = res['entity_score_list']
         target_keep = res['target_keep']
         # pre_mask = res['object_mask']
 
+        entity_embedding = query_feat[0][target_keep,:]
         # print(entity_embedding.shape)
         # entity_res = self.get_entity_embedding(
         #     pan_result=pan_results,
@@ -417,24 +411,15 @@ class Mask2FormerVitForinfer3(Mask2FormerVit3):
         #     meta=img_metas[0]
         # )
 
-        entity_num = len(entityid_list)
 
         relation_res = []
-        if entity_num != 0:
-            relation_pred, neg_idx = self.relationship_head.simple_test(query_feat, target_keep)
+        if len(entityid_list) != 0:
+            relation_pred, neg_idx = self.relationship_head.simple_test(query_feat, entity_embedding)
             # print(relation_pred.shape)
-            # relation_pred = torch.softmax(relation_pred, dim=-1)
+            relation_pred = torch.softmax(relation_pred, dim=-1)
             # 去除预测为空关系标签的影响
             relation_pred = relation_pred[:,1:]
             relation_pred[neg_idx,:] = -9999
-            relation_pred = torch.exp(relation_pred)
-            # relation_pred = torch.softmax(relation_pred, dim=-1)
-
-            entity_score_tensor = torch.tensor(entity_score_list, device=device, dtype=dtype).unsqueeze(0)
-            entity_score_tensor = torch.matmul(entity_score_tensor.t(), entity_score_tensor).reshape(1,-1).expand(56, -1)
-            # print(torch.ones((16,3)))
-            relation_pred = torch.mul(entity_score_tensor.t(), relation_pred)
-            
             try:
                 _, topk_indices = torch.topk(relation_pred.reshape([-1,]), k=100)
             except:
@@ -443,8 +428,8 @@ class Mask2FormerVitForinfer3(Mask2FormerVit3):
             for index in topk_indices:
                 pred_cls = index % relation_pred.shape[1]
                 index_subject_object = index // relation_pred.shape[1]
-                pred_subject = index_subject_object // entity_num
-                pred_object = index_subject_object % entity_num
+                pred_subject = index_subject_object // entity_embedding.shape[0]
+                pred_object = index_subject_object % entity_embedding.shape[0]
                 pred = [pred_subject.item(), pred_object.item(), pred_cls.item()]
                 relation_res.append(pred)
      

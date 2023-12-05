@@ -5,7 +5,7 @@ num_things_classes = 80
 num_stuff_classes = 53
 num_classes = num_things_classes + num_stuff_classes
 model = dict(
-    type='Mask2FormerVit3',
+    type='Mask2FormerVit',
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -18,7 +18,7 @@ model = dict(
         # init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')
     ),
     panoptic_head=dict(
-        type='Mask2FormerVitHead3',
+        type='Mask2FormerVitHead',
         in_channels=[256, 512, 1024, 2048],  # pass to pixel_decoder inside
         strides=[4, 8, 16, 32],
         feat_channels=256,
@@ -110,7 +110,7 @@ model = dict(
             loss_weight=5.0)
     ),
     relationship_head=dict(
-        type='rlnGroupToken',
+        type='rlnGroupToken2',
         mlp_ratio=4.,
         embed_dim=256,
         embed_factors=[1, 1, 1],
