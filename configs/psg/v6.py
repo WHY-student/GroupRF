@@ -5,7 +5,7 @@ num_things_classes = 80
 num_stuff_classes = 53
 num_classes = num_things_classes + num_stuff_classes
 model = dict(
-    type='Mask2FormerVit3',
+    type='Mask2FormerVit',
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -18,7 +18,7 @@ model = dict(
         # init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')
     ),
     panoptic_head=dict(
-        type='Mask2FormerVitHead3',
+        type='Mask2FormerVitHead',
         in_channels=[256, 512, 1024, 2048],  # pass to pixel_decoder inside
         strides=[4, 8, 16, 32],
         feat_channels=256,
@@ -162,8 +162,8 @@ model = dict(
     )
 
 dataset_type = 'PanopticSceneGraphDataset'
-ann_file = '/root/autodl-tmp/dataset/psg/psg.json'
-coco_root = '/root/autodl-tmp/dataset/coco'
+ann_file = '../dataset/psg/psg.json'
+coco_root = '../dataset/coco'
 # dataset settings
 dataset_type = 'CocoPanopticDataset'
 img_norm_cfg = dict(
@@ -236,23 +236,23 @@ data = dict(
     workers_per_gpu=4,
     train=dict(
         type=dataset_type,
-        ann_file='/root/autodl-tmp/dataset/mfpsg/psg_tra.json',
+        ann_file='../dataset/mfpsg/psg_tra.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file='/root/autodl-tmp/dataset/mfpsg/psg_val.json',
+        ann_file='../dataset/mfpsg/psg_val.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
-        ins_ann_file='/root/autodl-tmp/dataset/mfpsg/psg_instance_val.json',
+        ins_ann_file='../dataset/mfpsg/psg_instance_val.json',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file='/root/autodl-tmp/dataset/mfpsg/psg_val.json',
+        ann_file='../dataset/mfpsg/psg_val.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
-        ins_ann_file='/root/autodl-tmp/dataset/mfpsg/psg_instance_val.json',
+        ins_ann_file='../dataset/mfpsg/psg_instance_val.json',
         pipeline=test_pipeline))
 evaluation = dict(metric=['bbox', 'segm', 'pq'], classwise=True)
 # evaluation = dict(
@@ -336,7 +336,7 @@ mp_start_method = 'fork'
 #     metric=['PQ', 'bbox', 'segm'])
 
 
-load_from = '/root/autodl-tmp/psg/mfpsg/checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
-# resume_from = '/root/autodl-tmp/psg/mfpsg/output/v6/latest.pth'
+load_from = './checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
+# resume_from = './output/v6/latest.pth'
 resume_from = None
-work_dir = '/root/autodl-tmp/psg/mfpsg/output/v6'
+work_dir = './output/v6'

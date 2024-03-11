@@ -19,7 +19,7 @@ import PIL
 from detectron2.utils.visualizer import VisImage, Visualizer
 from mmdet.evaluation import sgg_evaluation
 
-from util import CLASSES, PREDICATES, get_colormap, write_json, load_json, read_image, Result, get_ann_info
+from util import PROJECT_ROOT, DATASETS_ROOT, CLASSES, PREDICATES, get_colormap, write_json, load_json, read_image, Result, get_ann_info
 
 from mmcv import Config, DictAction
 
@@ -29,17 +29,20 @@ import torch
 
 import time
 
+
 def test_matrics(
         cfg,
         ckp,
         mode='v6',
-        psg_test_data_file='/root/autodl-tmp/dataset/psg/psg_test.json',
-        img_prefix = '/root/autodl-tmp/dataset/coco',
+        psg_test_data_file='dataset/psg/psg_test.json',
+        img_prefix = 'dataset/coco',
         multiple_preds=False,
         iou_thrs=0.5,
         detection_method='pan_seg',
-        transformers_model='/root/autodl-tmp/psg/mfpsg/checkpoints/chinese-roberta-wwm-ext',
+        transformers_model='checkpoints/chinese-roberta-wwm-ext',
     ):
+    psg_test_data_file = os.path.join(DATASETS_ROOT, psg_test_data_file)
+    img_prefix = os.path.join(DATASETS_ROOT, img_prefix)
     INSTANCE_OFFSET = 1000
     print('\nLoading testing groundtruth...\n')
     # prog_bar = mmcv.ProgressBar(len(self))
@@ -127,9 +130,7 @@ def get_model(cfg, ckp, mode, transformers_model):
 
     cfg = mmcv.Config.fromfile(cfg)
     if mode=='v6':
-        cfg['model']['type'] = 'Mask2FormerVitForinfer3'
-    elif mode=='v5':
-        cfg['model']['type'] = 'Mask2FormerVitForinfer2'
+        cfg['model']['type'] = 'Mask2FormerVitForinfer'
     else:
         cfg['model']['type'] = 'Mask2FormerRelationForinfer'
         cfg['model']['relationship_head']['pretrained_transformers'] = transformers_model
@@ -137,13 +138,18 @@ def get_model(cfg, ckp, mode, transformers_model):
         if 'entity_length' in cfg['model']['relationship_head'] and cfg['model']['relationship_head']['entity_length'] > 1:
             cfg['model']['relationship_head']['entity_part_encoder'] = transformers_model
 
+    # config = cfg
 
-
-    # cfg['model']['relationship_head']['pretrained_transformers'] = transformers_model
-    # cfg['model']['relationship_head']['cache_dir'] = './'    
-    # if 'entity_length' in cfg['model']['relationship_head'] and cfg['model']['relationship_head']['entity_length'] > 1:
-    #     cfg['model']['relationship_head']['entity_part_encoder'] = transformers_model
-
+    # if 'pretrained' in config.model:
+    #     config.model.pretrained = None
+    # elif 'init_cfg' in config.model.backbone:
+    #     config.model.backbone.init_cfg = None
+    # config.model.train_cfg = None
+    # model = build_detector(config.model, test_cfg=config.get('test_cfg'))
+    # # if checkpoint is not None:
+    # checkpoint = load_checkpoint(model, ckp, map_location='cpu')
+    # save_checkpoint(model, filename="output/v6/epoch13.pth", meta=checkpoint["meta"])
+    # exit(0)
     model = init_detector(cfg, ckp)
     return model
 
@@ -178,13 +184,13 @@ def get_val_p(
         cfg, 
         ckp, 
         mode="v0", 
-        psg_tra_data_file='/root/autodl-tmp/dataset/psg/psg_train_val.json', 
-        psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json', 
-        psg_test_data_file='/root/autodl-tmp/dataset/psg/psg_test.json',
-        img_dir='/root/autodl-tmp/dataset/coco',
+        psg_tra_data_file='../dataset/psg/psg_train_val.json', 
+        psg_val_data_file='../dataset/psg/psg_val_test.json', 
+        psg_test_data_file='../dataset/psg/psg_test.json',
+        img_dir='../dataset/coco',
         val_mode_output_dir='submit/val_v2_latest',
         test_mode_output_dir='submit',
-        transformers_model='/root/autodl-tmp/psg/mfpsg/checkpoints/chinese-roberta-wwm-ext'
+        transformers_model='./checkpoints/chinese-roberta-wwm-ext'
         ):
     # if mode == 'val':
     jpg_output_dir = os.path.join(val_mode_output_dir, 'submission/panseg')
@@ -433,7 +439,6 @@ def iou(mask1, mask2):
     return iou_score
 
 
-
 def show_result(model,
                 img,
                 is_one_stage=False,
@@ -646,7 +651,6 @@ def draw_text(
 
 
 def show_gt(img,
-                
                 out_dir="output/v0/",
                 out_file=None):
 
@@ -723,21 +727,6 @@ def show_gt(img,
     if out_file is not None:
         mmcv.imwrite(viz_img, out_file)
 
-    # Draw relations
-
-    # # Filter out relations
-    # n_rel_topk = num_rel
-    # # Exclude background class
-    # rel_dists = result.rel_dists[:, 1:]
-    # # rel_dists = result.rel_dists
-    # rel_scores = rel_dists.max(1)
-    # # rel_scores = result.triplet_scores
-    # # Extract relations with top scores
-    # rel_topk_idx = np.argpartition(rel_scores, -n_rel_topk)[-n_rel_topk:]
-    # rel_labels_topk = rel_dists[rel_topk_idx].argmax(1)
-    # rel_pair_idxes_topk = result.rel_pair_idxes[rel_topk_idx]
-    # relations = np.concatenate(
-    #     [rel_pair_idxes_topk, rel_labels_topk[..., None]], axis=1)
     n_rels = len(relation)
 
     top_padding = 20
@@ -843,13 +832,11 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v6_token_ablation_8_1.py'
-    # cfg='configs/psg/v6.py'
-    ckp='output/v6_token_ablation_64_1/latest.pth'
-    # ckp='output/v6/epoch_12.pth'
+    cfg='configs/psg/v6.py'
+    ckp='output/v6/epoch_13.pth'
     mode='v6'
-    testFPS(cfg)
-    exit(0)
+    # testFPS(cfg)
+    # exit(0)
 
     # 测试
     test_matrics(
@@ -859,12 +846,12 @@ if __name__ == '__main__':
     )
     
     # 获取提交的submit
-    get_val_p(
-        cfg = cfg,
-        ckp = ckp,
-        mode = mode,
-        val_mode_output_dir='submit/val_v6_latest',
-    )
+    # get_val_p(
+    #     cfg = cfg,
+    #     ckp = ckp,
+    #     mode = mode,
+    #     val_mode_output_dir='submit/val_v6_latest',
+    # )
 
 
 

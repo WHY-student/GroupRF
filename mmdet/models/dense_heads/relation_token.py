@@ -114,7 +114,7 @@ class rlnGroupToken(BaseModule):
 
         group_token = self.norm(group_token)
 
-        
+
         object_feature_list, target_relation = self.get_embedding_relation(query_feat, pos_inds_list, pos_assigned_gt_inds_list, img_metas)
 
         relation_feature, all_edge_lbl, bs_size = concat_relation_features(object_feature_list, group_token, target_relation)

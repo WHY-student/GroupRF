@@ -208,14 +208,14 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3.9',
         ],
         license='Apache License 2.0',
-        install_requires=parse_requirements('requirements/runtime.txt'),
-        extras_require={
-            'all': parse_requirements('requirements.txt'),
-            'tests': parse_requirements('requirements/tests.txt'),
-            'build': parse_requirements('requirements/build.txt'),
-            'optional': parse_requirements('requirements/optional.txt'),
-            'mim': parse_requirements('requirements/mminstall.txt'),
-        },
+        # install_requires=parse_requirements('requirements/runtime.txt'),
+        # extras_require={
+        #     'all': parse_requirements('requirements.txt'),
+        #     'tests': parse_requirements('requirements/tests.txt'),
+        #     'build': parse_requirements('requirements/build.txt'),
+        #     'optional': parse_requirements('requirements/optional.txt'),
+        #     'mim': parse_requirements('requirements/mminstall.txt'),
+        # },
         ext_modules=[],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)

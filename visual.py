@@ -37,8 +37,8 @@ import matplotlib.pyplot as plt
 #     return model
 
 def show_gt(image_id, flag_show_relation=False):
-    psg_val_data_file = '/root/autodl-tmp/dataset/psg/psg_test.json'
-    img_dir = "/root/autodl-tmp/dataset/coco/"
+    psg_val_data_file = '../dataset/psg/psg_test.json'
+    img_dir = "../dataset/coco/"
     psg_val_data = load_json(psg_val_data_file)
     for d in tqdm(psg_val_data['data']):
         if d['image_id'] == str(image_id):
