@@ -9,4 +9,5 @@ einops==0.6.1
 timm==0.9.7
 seaborn==0.13.0
 openmim
+scipy
 # mmcv-full==1.6.1

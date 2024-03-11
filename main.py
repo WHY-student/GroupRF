@@ -304,7 +304,7 @@ def f3(psg_data, id_list, output_instance_json, coco_json_file):
 
     
 
-def f1(raw_psg_data, coco80_instance_val2017_json, output_tra_json, output_val_json, output_val_instance_json, ):
+def f1(raw_psg_data, psg_tra_data_file, psg_val_data_file, coco80_instance_val2017_json, output_tra_json, output_val_json, output_val_instance_json, ):
     # output_tra_json = '/share/wangqixun/workspace/bs/psg/psg/data/psg_tra.json'
     # output_val_json = '/share/wangqixun/workspace/bs/psg/psg/data/psg_val.json'
     # output_tra_instance_json = '/share/wangqixun/workspace/bs/psg/psg/data/psg_instance_tra.json'
@@ -314,7 +314,7 @@ def f1(raw_psg_data, coco80_instance_val2017_json, output_tra_json, output_val_j
     # coco80_instance_train2017_json = '/share/data/coco/annotations/instances_train2017_coco80.json'
     # coco80_instance_val2017_json = '/share/data/coco/annotations/instances_val2017_coco80.json'
 
-    tra_id_list, val_id_list, test_id_list = get_tra_val_test_list()
+    tra_id_list, val_id_list, test_id_list = get_tra_val_test_list(psg_tra_data_file, psg_val_data_file)
 
     psg_data = load_json(raw_psg_data)
 
@@ -337,15 +337,18 @@ def f1(raw_psg_data, coco80_instance_val2017_json, output_tra_json, output_val_j
 
 
 if __name__ == '__main__':
+    coco_root = "/home/wanghy/dataset/coco/"
     # raw data file
-    raw_psg_data='/root/autodl-tmp/dataset/psg/psg_train_val.json'
-    raw_coco_val_json_file='/root/autodl-tmp/dataset/coco/annotations/instances_val2017.json'
+    raw_psg_data = 'dataset/psg/psg_train_val.json'
+    psg_tra_data_file = 'dataset/psg/psg_train_val.json'
+    psg_val_data_file = 'dataset/psg/psg_val_test.json'
+    raw_coco_val_json_file = coco_root + 'annotations/instances_val2017.json'
 
     # output file
-    output_coco80_val_instance_json = '/root/autodl-tmp/dataset/mfpsg/instances_val2017_coco80.json'
-    output_tra_json='/root/autodl-tmp/dataset/mfpsg/psg_tra.json'
-    output_val_json='/root/autodl-tmp/dataset/mfpsg/psg_val.json'
-    output_val_instance_json='/root/autodl-tmp/dataset/mfpsg/psg_instance_val.json'
+    output_coco80_val_instance_json = 'dataset/instances_val2017_coco80.json'
+    output_tra_json='dataset/psg_tra.json'
+    output_val_json='dataset/psg_val.json'
+    output_val_instance_json='dataset/psg_instance_val.json'
 
 
     coco90_to_coco80(
@@ -354,6 +357,8 @@ if __name__ == '__main__':
     )
     f1(
         raw_psg_data=raw_psg_data,
+        psg_tra_data_file = psg_tra_data_file,
+        psg_val_data_file = psg_val_data_file,
         coco80_instance_val2017_json=output_coco80_val_instance_json,
         output_tra_json=output_tra_json,
         output_val_json=output_val_json,

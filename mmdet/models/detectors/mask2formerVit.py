@@ -105,7 +105,7 @@ class Mask2FormerVit(Mask2FormerRelation):
 
         losses.update(losses_relation)
 
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
         return losses
 
     def simple_test(self, imgs, img_metas, **kwargs):

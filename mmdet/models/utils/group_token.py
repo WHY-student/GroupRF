@@ -549,3 +549,64 @@ class GroupingLayer(nn.Module):
 
         return x, group_token, attn_dict
 
+# transfomr层
+class TransformerDecoderLayer(nn.Module):
+    def __init__(self,
+                 d_model=512,
+                 nhead=9,
+                 dim_feedforward=2048,
+                 dropout=0.1):
+        super().__init__()
+        # Normalization Layer
+        self.self_attn_norm = nn.LayerNorm(d_model)
+        self.cross_attn_norm = nn.LayerNorm(d_model)
+        # Attention Layer
+        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.multihead_attn = nn.MultiheadAttention(d_model,
+                                                    nhead,
+                                                    dropout=dropout,
+                                                    kdim=d_model,
+                                                    vdim=d_model)
+        # FFN
+        self.ffn = nn.Sequential(nn.Linear(d_model, dim_feedforward),
+                                 nn.ReLU(True), nn.Dropout(dropout),
+                                 nn.LayerNorm(dim_feedforward),
+                                 nn.Linear(dim_feedforward, d_model))
+        # LayerNorm & Dropout
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.norm3 = nn.LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+        self.dropout3 = nn.Dropout(dropout)
+
+    def with_pos_embed(self, tensor, pos):
+        return tensor if pos is None else tensor + pos.to(tensor.device)
+
+    def forward(self, vis, txt, vis_pos=None, txt_pos=None, pad_mask=None):
+        '''
+            vis: L1, b, 512
+            txt: L2, b, 512
+            vis_pos: 26*26, 1, 512
+            txt_pos: L, 1, 512
+            pad_mask: b, L
+        '''
+        # Self-Attention
+        vis2 = self.norm1(vis)
+        q = k = self.with_pos_embed(vis2, vis_pos)
+        vis2 = self.self_attn(q, k, value=vis2)[0]
+        vis2 = self.self_attn_norm(vis2)
+        vis = vis + self.dropout1(vis2)
+        # Cross-Attention
+        vis2 = self.norm2(vis)
+        vis2 = self.multihead_attn(query=self.with_pos_embed(vis2, vis_pos),
+                                   key=self.with_pos_embed(txt, txt_pos),
+                                   value=txt,
+                                   key_padding_mask=pad_mask)[0]
+        vis2 = self.cross_attn_norm(vis2)
+        vis = vis + self.dropout2(vis2)
+        # FFN
+        vis2 = self.norm3(vis)
+        vis2 = self.ffn(vis2)
+        vis = vis + self.dropout3(vis2)
+        return vis

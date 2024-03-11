@@ -18,3 +18,5 @@ python -m torch.distributed.launch \
     $CONFIG \
     --seed 0 \
     --launcher pytorch ${@:3} 
+
+# CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nnodes 1 --node_rank 0 --nproc_per_node 2 --master_port 12345 tools/train.py configs/psg/v0.py --seed 0

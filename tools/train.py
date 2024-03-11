@@ -24,7 +24,7 @@ from mmdet.utils import (collect_env, get_device, get_root_logger,
 
 def parse_args():
     # parser = argparse.ArgumentParser(description='Train a detector')
-    # parser.add_argument('--config', help='train config file path', default="configs/psg/v6.py")
+    # parser.add_argument('--config', help='train config file path', default="configs/psg/v0.py")
     # parser.add_argument(
     #     '--work-dir', help='the dir to save logs and models')
     # parser.add_argument(
@@ -56,7 +56,7 @@ def parse_args():
     #     type=int,
     #     help='id of gpu to use '
     #     '(only applicable to non-distributed training)',
-    #     default=0
+    #     default=1
     # )
     # parser.add_argument('--seed', type=int, default=0, help='random seed')
     # parser.add_argument(
@@ -324,6 +324,7 @@ def main():
         timestamp=timestamp,
         meta=meta)
 
+os.environ['CUDA_VISIBLE_DEVICES'] = "1,2"
 
 if __name__ == '__main__':
     main()

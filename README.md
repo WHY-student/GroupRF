@@ -119,6 +119,32 @@ zip -r submission.zip submission/
 ```
 
 
+## 数据准备
+coco2017(https://cocodataset.org/#download) 
+
+dataset/
+    coco/
+        annotations/
+        panoptic_train2017/
+        panoptic_val2017/
+        train2017/
+        val2017/
+
+psg(https://entuedu-my.sharepoint.com/:f:/g/personal/jingkang001_e_ntu_edu_sg/EgQzvsYo3t9BpxgMZ6VHaEMBDAb7v0UgI8iIAExQUJq62Q?e=fIY3zh)
+GroupRF/
+    dataset/
+        psg/
+
+
++ 设置datasetProcess
+
+'''
+coco_root = "/home/wanghy/dataset/coco/" (coco数据集的所在目录)
+'''
+
+
+
+
 
 
 
