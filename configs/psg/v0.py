@@ -339,6 +339,6 @@ mp_start_method = 'fork'
 
 
 load_from = './checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
-# resume_from = './output/v6/latest.pth'
+# resume_from = './output/v0/latest.pth'
 resume_from = None
-work_dir = './output/v6'
+work_dir = './output/v0'

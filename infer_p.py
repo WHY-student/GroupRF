@@ -41,7 +41,7 @@ def test_matrics(
         detection_method='pan_seg',
         transformers_model='checkpoints/chinese-roberta-wwm-ext',
     ):
-    psg_test_data_file = os.path.join(DATASETS_ROOT, psg_test_data_file)
+    # psg_test_data_file = os.path.join(DATASETS_ROOT, psg_test_data_file)
     img_prefix = os.path.join(DATASETS_ROOT, img_prefix)
     INSTANCE_OFFSET = 1000
     print('\nLoading testing groundtruth...\n')
@@ -832,8 +832,8 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v6.py'
-    ckp='output/v6/epoch_13.pth'
+    cfg='configs/psg/v0.py'
+    ckp='output/v0/epoch_12.pth'
     mode='v6'
     # testFPS(cfg)
     # exit(0)

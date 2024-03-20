@@ -407,8 +407,12 @@ class rlnGroupTokenMultiHead(BaseModule):
         entity_embedding = query_feat[0][target_keep,:]
 
         relation_feature, neg_idx = concat_relation_features_test(entity_embedding, group_token)
-        relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))
+        relation_feature = relation_feature.permute(1,0,2)
 
+        relation_feature = self.relation_embedding(relation_feature, relation_feature).permute(1,0,2)
+
+        relation_pred = self.relation_head(relation_feature.reshape(relation_feature.shape[0], -1))
+        
         if visual:
             return relation_pred, neg_idx, relation_feature
         return relation_pred, neg_idx
@@ -436,6 +440,7 @@ class Mlp(nn.Module):
 
 
 def concat_relation_features(object_features, relation_tokens, target_edges):
+    device = relation_tokens.device
     token_num = relation_tokens.shape[1]
 
     rel_labels = [t[:,2] if len(t)>0 else torch.zeros((0,1), dtype=torch.long).to(relation_tokens.device) for t in target_edges]
@@ -504,10 +509,14 @@ def concat_relation_features(object_features, relation_tokens, target_edges):
         #     token_relation_features.append(torch.cat((object_feature[edges[0],:].repeat(relation_token.shape[0],1),object_feature[edges[1],:].repeat(relation_token.shape[0],1),relation_token), 1).view(1, -1))
         # # print(token_relation_features[0].shape)
         # # print(len(token_relation_features))
-        # relation_features.append(torch.cat(token_relation_features,0))
+        # relation_features.append(torch.cat(token_relation_features, 0))
         relation_features.append(token_relation_features)
-    relation_features = torch.cat(relation_features, 0)
-    all_edge_lbl = torch.cat(all_edge_lbl, 0)
+    if len(relation_features) != 0:
+        relation_features = torch.cat(relation_features, 0)
+        all_edge_lbl = torch.cat(all_edge_lbl, 0)
+    else:
+        relation_features = torch.zeros((1,8,768)).to(device)
+        all_edge_lbl = torch.zeros((1)).to(device).int()
 
     return relation_features, all_edge_lbl, bs_size
 
