@@ -126,7 +126,7 @@ def test_matrics(
         detection_method=detection_method,
     )
 
-def get_model(cfg, ckp, mode, transformers_model):
+def get_model(cfg, ckp, mode, transformers_model, device="cuda:0"):
 
     cfg = mmcv.Config.fromfile(cfg)
     if mode=='v6':
@@ -150,7 +150,7 @@ def get_model(cfg, ckp, mode, transformers_model):
     # checkpoint = load_checkpoint(model, ckp, map_location='cpu')
     # save_checkpoint(model, filename="output/v6/epoch13.pth", meta=checkpoint["meta"])
     # exit(0)
-    model = init_detector(cfg, ckp)
+    model = init_detector(cfg, ckp, device=device)
     return model
 
 
@@ -833,7 +833,7 @@ def testFPS(config):
 if __name__ == '__main__':
     
     cfg='configs/psg/v0.py'
-    ckp='output/v0/epoch_12.pth'
+    ckp='output/epoch_12.pth'
     mode='v6'
     # testFPS(cfg)
     # exit(0)
