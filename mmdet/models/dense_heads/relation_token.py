@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import numpy as np
 
 from IPython import embed
-from ..utils.group_token import GroupingBlock, GroupingLayer, TransformerDecoderLayer
+from ..utils.group_token import GroupingBlock, GroupingLayer, TransformerLayer
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -229,6 +229,8 @@ class rlnGroupTokenMultiHead(BaseModule):
         use_checkpoint=False,
         hard_assignment=True,
         feed_forward=256,
+        with_transformer=True,
+        with_group_block=True,
     ):
         super().__init__()
         norm_layer = nn.LayerNorm
@@ -273,7 +275,10 @@ class rlnGroupTokenMultiHead(BaseModule):
                 use_checkpoint=use_checkpoint,
                 group_projector=group_projector,
                 # only zero init group token if we have a projection
-                zero_init_group_token=group_projector is not None)
+                zero_init_group_token=group_projector is not None,
+                with_transformer=with_transformer,
+                with_group_block=with_group_block,
+                )
             self.layers.append(layer)
             # if i_layer < self.num_layers - 1:
             num_input_token = num_output_token
@@ -286,9 +291,10 @@ class rlnGroupTokenMultiHead(BaseModule):
         # 这里想模拟多头注意力，将每一个query token看成是一个头的一部分
 
         # 每一个头的结果和其他头的结果做一个self.attention
-        self.relation_embedding = TransformerDecoderLayer(d_model=3*embed_dim, nhead=8, dropout=0.1)
+        self.relation_fuse = TransformerLayer(d_model=3*embed_dim, nhead=1, dropout=0.1)
 
-        self.relation_head = Mlp(3*embed_dim*self.token_num, embed_dim*self.token_num, self.num_cls+1)
+        self.relation_embedding = Mlp(3*embed_dim,feed_forward, self.num_cls+1)
+        self.relation_head = Mlp((self.num_cls+1)*self.token_num, feed_forward, self.num_cls+1)
 
     def forward_train(self,
         query_feat,
@@ -310,9 +316,10 @@ class rlnGroupTokenMultiHead(BaseModule):
         # N * 8* 768
         relation_feature = relation_feature.permute(1,0,2)
 
-        relation_feature = self.relation_embedding(relation_feature, relation_feature).permute(1,0,2)
+        relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
 
-        relation_pred = self.relation_head(relation_feature.reshape(relation_feature.shape[0], -1))
+        relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))
+        # relation_pred = self.relation_head(relation_feature.reshape(relation_feature.shape[0], -1))
 
         return relation_pred, all_edge_lbl, bs_size
     
@@ -409,9 +416,9 @@ class rlnGroupTokenMultiHead(BaseModule):
         relation_feature, neg_idx = concat_relation_features_test(entity_embedding, group_token)
         relation_feature = relation_feature.permute(1,0,2)
 
-        relation_feature = self.relation_embedding(relation_feature, relation_feature).permute(1,0,2)
+        relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
 
-        relation_pred = self.relation_head(relation_feature.reshape(relation_feature.shape[0], -1))
+        relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))
         
         if visual:
             return relation_pred, neg_idx, relation_feature
@@ -447,10 +454,6 @@ def concat_relation_features(object_features, relation_tokens, target_edges):
     # target_edges = [bs*N*2] object_id,subject_id
     target_edges = [t[:,:2] if len(t)>0 else torch.zeros((0,2), dtype=torch.long).to(relation_tokens.device) for t in target_edges]
 
-    # target_edges = [[t for t in tgt if t[0].cpu() in i and t[1].cpu() in i] for tgt, i in zip(target_edges, pos_assigned_gt_inds_list)]
-    # target_edges = [torch.stack(t, 0) if len(t)>0 else torch.zeros((0,2), dtype=torch.long).to(relation_tokens.device) for t in target_edges]
-
-
     all_edge_lbl = []
     relation_features = []
 
@@ -482,8 +485,10 @@ def concat_relation_features(object_features, relation_tokens, target_edges):
         bs_size.append(filtered_edge.shape[0])
 
         # check whether the number of -ve edges are within limit
-        if neg_edges.shape[0]>=90:# random sample -ve edge
-            idx_ = torch.randperm(neg_edges.shape[0])[:90]
+        # limit_neg_num = filtered_edge.shape[0] * 5
+        limit_neg_num = 90
+        if neg_edges.shape[0]>= limit_neg_num:# random sample -ve edge
+            idx_ = torch.randperm(neg_edges.shape[0])[:limit_neg_num]
             neg_edges = neg_edges[idx_,:]
         # neg_size.append(neg_edges.shape[0])
 

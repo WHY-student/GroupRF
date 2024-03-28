@@ -3,7 +3,7 @@ _base_ = ['./v6.py']
 
 depths = [2, 2, 6, 2]
 model = dict(
-    type='Mask2FormerVit3',
+    type='Mask2FormerVit',
     backbone=dict(
         _delete_=True,
         type='SwinTransformer',
@@ -25,7 +25,7 @@ model = dict(
         # init_cfg=dict(type='Pretrained', checkpoint=pretrained)
         ),
     panoptic_head=dict(
-        type='Mask2FormerVitHead3', in_channels=[96, 192, 384, 768]),
+        type='Mask2FormerVitHead', in_channels=[96, 192, 384, 768]),
     init_cfg=None)
 
 # set all layers in backbone to lr_mult=0.1
@@ -62,8 +62,8 @@ optimizer = dict(
     betas=(0.9, 0.999),
     paramwise_cfg=dict(custom_keys=custom_keys, norm_decay_mult=0.0))
 
-load_from = '/root/autodl-tmp/psg/mfpsg/checkpoints/mask2former_swin-t-p4-w7-224_lsj_8x2_50e_coco-panoptic_20220326_224553-fc567107.pth'
+load_from = './checkpoints/mask2former_swin-t-p4-w7-224_lsj_8x2_50e_coco-panoptic_20220326_224553-fc567107.pth'
 
-work_dir = '/root/autodl-tmp/psg/mfpsg/output/v6_swin-t'
+work_dir = './output/v6_swin-t'
 # resume_from = '/root/autodl-tmp/psg/mfpsg/output/v5_swin-t/latest.pth'
 resume_from = None
