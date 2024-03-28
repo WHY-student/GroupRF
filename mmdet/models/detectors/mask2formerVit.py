@@ -424,6 +424,9 @@ class Mask2FormerVitForinfer(Mask2FormerVit):
             # print(relation_pred.shape)
             # relation_pred = torch.softmax(relation_pred, dim=-1)
             # 去除预测为空关系标签的影响
+            # tokens_scores = tokens_scores[:,:,1:]
+            # tokens_scores = torch.exp(tokens_scores)
+
             relation_pred = relation_pred[:,1:]
             relation_pred[neg_idx,:] = -9999
             relation_pred = torch.exp(relation_pred)

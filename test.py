@@ -34,8 +34,9 @@ import time
 from util import get_colormap
 
 if __name__=="__main__":
-    colormap = get_colormap(10)
-    print(colormap)
+    # psg_all_data_file='/root/autodl-tmp/dataset/psg/psg.json'
+    # colormap = get_colormap(10)
+    # print(colormap)
     # psg_all_data_file='/root/autodl-tmp/dataset/psg/psg.json'
     # psg_tra_data_file = '/root/autodl-tmp/dataset/psg/psg_train_val.json'
     # psg_val_data_file='/root/autodl-tmp/dataset/psg/psg_val_test.json'
@@ -53,7 +54,7 @@ if __name__=="__main__":
     # relation_feature, all_edge_lbl, bs_size = concat_relation_features(object_feature_list, group_token, target_relation)
 
 
-    # pass
+    pass
     
     # for i in range(1000):
     #     result = torch.cat((entity_embedding.repeat(object_num, 1).repeat(token_num, 1), entity_embedding.unsqueeze(1).expand(object_num, object_num, -1).reshape(object_num*object_num, -1).repeat(token_num, 1), relation_tokens.unsqueeze(1).expand(token_num, object_num*object_num, -1).reshape(token_num*object_num*object_num, -1)), 1)

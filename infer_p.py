@@ -128,7 +128,7 @@ def test_matrics(
         detection_method=detection_method,
     )
 
-def get_model(cfg, ckp, mode, transformers_model, device="cuda:0"):
+def get_model(cfg, ckp, mode, transformers_model, device="cuda:1"):
 
     cfg = mmcv.Config.fromfile(cfg)
     if mode=='v6':
@@ -186,10 +186,10 @@ def get_val_p(
         cfg, 
         ckp, 
         mode="v0", 
-        psg_tra_data_file='../dataset/psg/psg_train_val.json', 
-        psg_val_data_file='../dataset/psg/psg_val_test.json', 
-        psg_test_data_file='../dataset/psg/psg_test.json',
-        img_dir='../dataset/coco',
+        psg_tra_data_file='dataset/psg/psg_train_val.json', 
+        psg_val_data_file='dataset/psg/psg_val_test.json', 
+        psg_test_data_file='dataset/psg/psg_test.json',
+        img_dir= coco_root,
         val_mode_output_dir='submit/val_v2_latest',
         test_mode_output_dir='submit',
         transformers_model='./checkpoints/chinese-roberta-wwm-ext'
@@ -213,7 +213,12 @@ def get_val_p(
     psg_val_data = load_json(psg_test_data_file)
 
     model = get_model(cfg, ckp, mode, transformers_model=transformers_model)
-
+    # cfg = Config.fromfile(cfg)
+    # model = build_detector(
+    #     cfg.model,
+    #     train_cfg=cfg.get('train_cfg'),
+    #     test_cfg=cfg.get('test_cfg'))
+    
     cur_nb = -1
     nb_vis = None
 
@@ -834,8 +839,8 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v0.py'
-    ckp='output/epoch_12.pth'
+    cfg='configs/psg/v6.py'
+    ckp=''
     mode='v6'
     # testFPS(cfg)
     # exit(0)
@@ -852,7 +857,7 @@ if __name__ == '__main__':
     #     cfg = cfg,
     #     ckp = ckp,
     #     mode = mode,
-    #     val_mode_output_dir='submit/val_v6_latest',
+    #     val_mode_output_dir='submit/val_none_latest',
     # )
 
 

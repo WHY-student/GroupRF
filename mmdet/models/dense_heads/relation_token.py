@@ -236,6 +236,7 @@ class rlnGroupTokenMultiHead(BaseModule):
         norm_layer = nn.LayerNorm
         num_layers = 3
         num_input_token = 100
+        self.group_token_prompt = nn.Parameter(torch.zeros(1, num_output_groups[-1], embed_dim))
         # stochastic depth
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
 
@@ -306,8 +307,10 @@ class rlnGroupTokenMultiHead(BaseModule):
         group_token = query_feat
         for layer in self.layers:
             group_token, temp_group_token, _ = layer(group_token, temp_group_token)
-
         group_token = self.norm(group_token)
+
+        group_token_prompt = self.group_token_prompt.expand(query_feat.shape[0],-1,-1)
+        group_token = group_token + group_token_prompt
 
 
         object_feature_list, target_relation = self.get_embedding_relation(query_feat, pos_inds_list, pos_assigned_gt_inds_list, img_metas)
@@ -328,7 +331,7 @@ class rlnGroupTokenMultiHead(BaseModule):
         for id, label in enumerate(all_edge_lbl):
             target_relation_tensor[id, label] = 1
         loss = self.multilabel_categorical_crossentropy(target_relation_tensor, relation_pred)
-        loss = loss.mean() * 30
+        loss = loss.mean() * 100
 
         return loss
     
@@ -392,8 +395,10 @@ class rlnGroupTokenMultiHead(BaseModule):
             group_token, temp_group_token, _ = layer(group_token, temp_group_token)
             # if return_attn and attention['soft'].shape[-1] == 100:
             #     show_attention = {'soft':attention['soft'][0][0].clone(), 'hard':attention['hard'][0][0].clone()}
-
         group_token = self.norm(group_token)
+        
+        group_token_prompt = self.group_token_prompt.expand(query_feat.shape[0],-1,-1)
+        group_token = group_token + group_token_prompt
 
 
         group_token = group_token[0]
@@ -418,10 +423,12 @@ class rlnGroupTokenMultiHead(BaseModule):
 
         relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
 
-        relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))
+        tokens_scores = self.relation_embedding(relation_feature)
+
+        relation_pred = self.relation_head(tokens_scores.reshape(relation_feature.shape[0], -1))
         
         if visual:
-            return relation_pred, neg_idx, relation_feature
+            return relation_pred, neg_idx, tokens_scores
         return relation_pred, neg_idx
 
 

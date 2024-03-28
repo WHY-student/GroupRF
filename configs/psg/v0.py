@@ -237,7 +237,7 @@ val_dataloader = dict(
 
 data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=1,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         ann_file='dataset/psg_tra.json',
@@ -253,7 +253,7 @@ data = dict(
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file='dataset/psg_val.json',
+        ann_file='dataset/psg/psg_test.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
         ins_ann_file='dataset/psg_instance_val.json',
@@ -279,9 +279,10 @@ optimizer = dict(
     paramwise_cfg=dict(
         custom_keys={
             'backbone': dict(lr_mult=0.1, decay_mult=1.0),
-            'query_embed': embed_multi,
-            'query_feat': embed_multi,
-            'level_embed': embed_multi,
+            'panoptic_head': dict(lr_mult=0.1, decay_mult=1.0),
+            # 'query_embed': embed_multi,
+            # 'query_feat': embed_multi,
+            # 'level_embed': embed_multi,
         },
         norm_decay_mult=0.0))
 optimizer_config = dict(grad_clip=dict(max_norm=0.01, norm_type=2))

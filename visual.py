@@ -20,6 +20,7 @@ from infer_p import get_model
 
 import networkx as nx
 import matplotlib.pyplot as plt
+from mmdet.path import coco_root
 
 # def get_model(cfg, ckp, transformers_model):
 #     # print(cfg)
@@ -37,8 +38,8 @@ import matplotlib.pyplot as plt
 #     return model
 
 def show_gt(image_id, flag_show_relation=False):
-    psg_val_data_file = '../dataset/psg/psg_test.json'
-    img_dir = "../dataset/coco/"
+    psg_val_data_file = 'dataset/psg/psg_test.json'
+    img_dir = coco_root
     psg_val_data = load_json(psg_val_data_file)
     for d in tqdm(psg_val_data['data']):
         if d['image_id'] == str(image_id):
@@ -237,14 +238,14 @@ def show_hot(show_attention):
 
     plt.savefig('savefig_example.png')
 
-def show_tokens_scores(tokens_scores, relation_res, entity_embedding):
+def show_tokens_scores(tokens_scores, relation_res, entityid_list):
 
-    object_num = entity_embedding.shape[0]
-    relation = relation_res[19]
+    object_num = len(entityid_list)
+    relation = relation_res[0]
     show_scores = tokens_scores[relation[0]*object_num+relation[1]]
     # show_scores = torch.softmax(show_scores, dim=-1)
     print(show_scores.shape)
-    sns.heatmap(show_scores.detach().cpu().tolist(), annot=True, cmap="YlGnBu")
+    sns.heatmap(show_scores.detach().cpu().tolist(), annot=False, cmap="YlGnBu")
     # 可选：添加轴标签
     plt.xlabel("X")
     plt.ylabel("Y")
@@ -341,14 +342,12 @@ def visualize_scene_graph(objects, relationships):
 if __name__=="__main__":
 
     INSTANCE_OFFSET = 1000
-    # cfg='configs/psg/v6_token_ablation_64_4.py'
-    cfg='configs/psg/v6.py'
-    # ckp=None
-    # ckp='output/v6_token_ablation_64_4/latest.pth'
-    ckp='output/v6/epoch_12.pth'
-    image_id = 285707
+    cfg='configs/psg/v0_ablation_none.py'
+    ckp='output/v0_ablation_none/epoch_12.pth'
 
-    model = get_model(cfg, ckp, mode='v6', transformers_model=None)
+    image_id = 2316037
+
+    model = get_model(cfg, ckp, mode='v6', transformers_model=None, device="cuda:0")
     model.eval()
     # 模拟输入数据（替换为你的实际数据）
     # image_name = '/root/autodl-tmp/dataset/coco/val2017/000000507015.jpg'
@@ -368,7 +367,11 @@ if __name__=="__main__":
     results = model.simple_test(imgs, img_metas)
 
     res = results[0]
-    # show_tokens_scores(tokens_scores, relation_res, entity_embedding)
+
+    # rela_results = res['rela_results']
+    # relation_res = rela_results['relation']
+    # entityid_list = rela_results['entityid_list']
+    # show_tokens_scores(tokens_scores, relation_res, entityid_list)
 
     pan_results = res['pan_results']
     rela_results = res['rela_results']
