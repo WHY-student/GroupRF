@@ -8,6 +8,7 @@ PORT=${PORT:-29500}
 MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
+CUDA_VISIBLE_DEVICES=2 \
 python -m torch.distributed.launch \
     --nnodes=$NNODES \
     --node_rank=$NODE_RANK \
@@ -19,4 +20,6 @@ python -m torch.distributed.launch \
     --seed 0 \
     --launcher pytorch ${@:3} 
 
-# CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nnodes 1 --node_rank 0 --nproc_per_node 2 --master_port 12345 tools/train.py configs/psg/v0.py --seed 0
+#  CUDA_VISIBLE_DEVICES=2,3 python -m torch.distributed.launch --nnodes 1 --node_rank 0 --nproc_per_node 2 --master_port 12345 tools/train.py configs/psg/v0.py --seed 666
+
+#  CUDA_VISIBLE_DEVICES=2,3 python -m torch.distributed.launch --nnodes 1 --node_rank 0 --nproc_per_node 2 --master_port 12345 tools/train.py configs/psg/v0.py --seed 666 | tee ./models/refcoco/output

@@ -24,7 +24,7 @@ from mmdet.utils import (collect_env, get_device, get_root_logger,
 
 def parse_args():
     # parser = argparse.ArgumentParser(description='Train a detector')
-    # parser.add_argument('--config', help='train config file path', default="configs/psg/v0.py")
+    # parser.add_argument('--config', help='train config file path', default="configs/psg/v6.py")
     # parser.add_argument(
     #     '--work-dir', help='the dir to save logs and models')
     # parser.add_argument(
@@ -41,6 +41,7 @@ def parse_args():
     # group_gpus.add_argument(
     #     '--gpus',
     #     type=int,
+    #     # default=1,
     #     help='(Deprecated, please use --gpu-id) number of gpus to use '
     #     '(only applicable to non-distributed training)',
     # )
@@ -48,6 +49,7 @@ def parse_args():
     #     '--gpu-ids',
     #     type=int,
     #     nargs='+',
+    #     # default=2,
     #     help='(Deprecated, please use --gpu-id) ids of gpus to use '
     #     '(only applicable to non-distributed training)',
     # )
@@ -250,7 +252,7 @@ def main():
                       'in `gpu_ids` now.')
     if args.gpus is None and args.gpu_ids is None:
         cfg.gpu_ids = [args.gpu_id]
-    # cfg.gpu_ids = [0, 1]
+    # cfg.gpu_ids = [2]
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False

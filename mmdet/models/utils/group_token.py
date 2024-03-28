@@ -460,7 +460,10 @@ class GroupingLayer(nn.Module):
                  downsample=None,
                  use_checkpoint=False,
                  group_projector=None,
-                 zero_init_group_token=False):
+                 zero_init_group_token=False,
+                with_transformer=True,
+                with_group_block=True,
+            ):
 
         super().__init__()
         self.dim = dim
@@ -474,7 +477,8 @@ class GroupingLayer(nn.Module):
                 trunc_normal_(self.group_token, std=.02)
         else:
             self.group_token = None
-
+        self.with_transformer = with_transformer
+        self.with_group_block = with_group_block
         # build blocks
         self.depth = depth
         blocks = []
@@ -534,20 +538,24 @@ class GroupingLayer(nn.Module):
             group_token = None
 
         B, L, C = x.shape
-        cat_x = self.concat_x(x, group_token)
-        for blk_idx, blk in enumerate(self.blocks):
-            if self.use_checkpoint:
-                cat_x = checkpoint.checkpoint(blk, cat_x)
-            else:
-                cat_x = blk(cat_x)
+        if self.with_transformer:
+            cat_x = self.concat_x(x, group_token)
+            for blk_idx, blk in enumerate(self.blocks):
+                if self.use_checkpoint:
+                    cat_x = checkpoint.checkpoint(blk, cat_x)
+                else:
+                    cat_x = blk(cat_x)
 
-        x, group_token = self.split_x(cat_x)
+            x, group_token = self.split_x(cat_x)
 
         attn_dict = None
-        if self.downsample is not None:
-            x, attn_dict = self.downsample(x, group_token, return_attn=return_attn)
+        if self.with_group_block:
+            if self.downsample is not None:
+                x, attn_dict = self.downsample(x, group_token, return_attn=return_attn)
 
-        return x, group_token, attn_dict
+            return x, group_token, attn_dict
+        else:
+            return group_token, None, attn_dict
 
 # transfomr层
 class TransformerDecoderLayer(nn.Module):

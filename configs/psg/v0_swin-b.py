@@ -1,4 +1,4 @@
-_base_ = ['./v6_swin-t.py']
+_base_ = ['./v0_swin-t.py']
 # pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384.pth'  # noqa
 
 depths = [2, 2, 18, 2]
@@ -42,11 +42,11 @@ custom_keys.update({
 optimizer = dict(
     paramwise_cfg=dict(custom_keys=custom_keys, norm_decay_mult=0.0))
 
-load_from = './checkpoints/mask2former_swin-b-p4-w12-384_lsj_8x2_50e_coco-panoptic_20220331_002244-c149a9e9.pth'
+load_from = 'checkpoints/mask2former_swin-b-p4-w12-384_lsj_8x2_50e_coco-panoptic_20220331_002244-c149a9e9.pth'
 data = dict(
     samples_per_gpu=3,
-    workers_per_gpu=2,
+    workers_per_gpu=4,
 )
-work_dir = './output/v6_swin-b'
-# resume_from = './output/v6_swin-b/latest.pth'
+work_dir = 'output/v0_swin-b'
+# resume_from = 'output/v0_swin-b/latest.pth'
 resume_from = None

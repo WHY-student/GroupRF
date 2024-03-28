@@ -229,6 +229,8 @@ class rlnGroupTokenMultiHead(BaseModule):
         use_checkpoint=False,
         hard_assignment=True,
         feed_forward=256,
+        with_transformer=True,
+        with_group_block=True,
     ):
         super().__init__()
         norm_layer = nn.LayerNorm
@@ -273,7 +275,10 @@ class rlnGroupTokenMultiHead(BaseModule):
                 use_checkpoint=use_checkpoint,
                 group_projector=group_projector,
                 # only zero init group token if we have a projection
-                zero_init_group_token=group_projector is not None)
+                zero_init_group_token=group_projector is not None,
+                with_transformer=with_transformer,
+                with_group_block=with_group_block,
+                )
             self.layers.append(layer)
             # if i_layer < self.num_layers - 1:
             num_input_token = num_output_token
@@ -481,7 +486,7 @@ def concat_relation_features(object_features, relation_tokens, target_edges):
 
         # check whether the number of -ve edges are within limit
         # limit_neg_num = filtered_edge.shape[0] * 5
-        limit_neg_num = 100
+        limit_neg_num = 90
         if neg_edges.shape[0]>= limit_neg_num:# random sample -ve edge
             idx_ = torch.randperm(neg_edges.shape[0])[:limit_neg_num]
             neg_edges = neg_edges[idx_,:]
