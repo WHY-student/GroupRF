@@ -1,4 +1,4 @@
-coco_root = "/home/wanghy/dataset/coco/"
+from mmdet.path import coco_root
 
 find_unused_parameters=True
 

@@ -1,3 +1,5 @@
+from mmdet.path import coco_root
+
 find_unused_parameters=True
 
 num_relation = 56
@@ -163,7 +165,6 @@ model = dict(
 
 dataset_type = 'PanopticSceneGraphDataset'
 ann_file = '../dataset/psg/psg.json'
-coco_root = '../dataset/coco'
 # dataset settings
 dataset_type = 'CocoPanopticDataset'
 img_norm_cfg = dict(
@@ -236,23 +237,23 @@ data = dict(
     workers_per_gpu=4,
     train=dict(
         type=dataset_type,
-        ann_file='../dataset/mfpsg/psg_tra.json',
+        ann_file='dataset/psg_tra.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file='../dataset/mfpsg/psg_val.json',
+        ann_file='dataset/psg_val.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
-        ins_ann_file='../dataset/mfpsg/psg_instance_val.json',
+        ins_ann_file='dataset/psg_instance_val.json',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file='../dataset/mfpsg/psg_val.json',
+        ann_file='dataset/psg_val.json',
         img_prefix=coco_root,
         seg_prefix=coco_root,
-        ins_ann_file='../dataset/mfpsg/psg_instance_val.json',
+        ins_ann_file='dataset/psg_instance_val.json',
         pipeline=test_pipeline))
 evaluation = dict(metric=['bbox', 'segm', 'pq'], classwise=True)
 # evaluation = dict(
@@ -298,42 +299,6 @@ log_level = 'INFO'
 workflow = [('train', 1)]
 opencv_num_threads = 0
 mp_start_method = 'fork'
-
-
-
-# max_iters = 368750
-# runner = dict(type='IterBasedRunner', max_iters=max_iters)
-# learning policy
-# lr_config = dict(
-#     policy='step',
-#     gamma=0.1,
-#     by_epoch=False,
-#     step=[327778, 355092],
-#     warmup='linear',
-#     warmup_by_epoch=False,
-#     warmup_ratio=1.0,  # no warmup
-#     warmup_iters=10)
-# log_config = dict(
-#     interval=50,
-#     hooks=[
-#         dict(type='TextLoggerHook', by_epoch=False),
-#         dict(type='TensorboardLoggerHook', by_epoch=False)
-#     ])
-# custom_hooks = [dict(type='NumClassCheckHook')]
-# dist_params = dict(backend='nccl')
-# log_level = 'INFO'
-# opencv_num_threads = 0
-# mp_start_method = 'fork'
-# auto_scale_lr = dict(enable=False, base_batch_size=12)
-# interval = 100
-# workflow = [('train', interval)]
-# checkpoint_config = dict(
-#     by_epoch=False, interval=interval, save_last=True, max_keep_ckpts=3)
-# dynamic_intervals = [(max_iters // interval * interval + 1, max_iters)]
-# evaluation = dict(
-#     interval=interval,
-#     dynamic_intervals=dynamic_intervals,
-#     metric=['PQ', 'bbox', 'segm'])
 
 
 load_from = './checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'

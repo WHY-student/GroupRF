@@ -10,10 +10,6 @@ from typing import Tuple
 import os.path as osp
 import random
 
-
-PROJECT_ROOT = os.getcwd()
-DATASETS_ROOT = os.path.dirname(PROJECT_ROOT)
-
 CLASSES = [
     'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
     'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign',

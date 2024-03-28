@@ -19,7 +19,7 @@ import PIL
 from detectron2.utils.visualizer import VisImage, Visualizer
 from mmdet.evaluation import sgg_evaluation
 
-from util import PROJECT_ROOT, DATASETS_ROOT, CLASSES, PREDICATES, get_colormap, write_json, load_json, read_image, Result, get_ann_info
+from util import CLASSES, PREDICATES, get_colormap, write_json, load_json, read_image, Result, get_ann_info
 
 from mmcv import Config, DictAction
 
@@ -29,20 +29,22 @@ import torch
 
 import time
 
+from mmdet.path import coco_root
+
 
 def test_matrics(
         cfg,
         ckp,
         mode='v6',
         psg_test_data_file='dataset/psg/psg_test.json',
-        img_prefix = 'dataset/coco',
+        img_prefix = coco_root,
         multiple_preds=False,
         iou_thrs=0.5,
         detection_method='pan_seg',
         transformers_model='checkpoints/chinese-roberta-wwm-ext',
     ):
     # psg_test_data_file = os.path.join(DATASETS_ROOT, psg_test_data_file)
-    img_prefix = os.path.join(DATASETS_ROOT, img_prefix)
+    # img_prefix = os.path.join(DATASETS_ROOT, img_prefix)
     INSTANCE_OFFSET = 1000
     print('\nLoading testing groundtruth...\n')
     # prog_bar = mmcv.ProgressBar(len(self))
