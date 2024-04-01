@@ -263,12 +263,12 @@ class GroupingBlock(nn.Module):
         group_tokens = self.norm_tokens(group_tokens)
         x = self.norm_x(x)
         # [B, S_2, C]
-        projected_group_tokens = self.project_group_token(group_tokens)
-        projected_group_tokens = self.pre_assign_attn(projected_group_tokens, x)
-        new_x, attn_dict = self.assign(projected_group_tokens, x, return_attn=return_attn)
+        projected_group_tokens = self.project_group_token(group_tokens) # MLP
+        projected_group_tokens = self.pre_assign_attn(projected_group_tokens, x)    # 一个正常的cross_attention
+        new_x, attn_dict = self.assign(projected_group_tokens, x, return_attn=return_attn)  # 一个自己设计的cross_attention
         new_x += projected_group_tokens
 
-        new_x = self.reduction(new_x) + self.mlp_channels(self.norm_new_x(new_x))
+        new_x = self.reduction(new_x) + self.mlp_channels(self.norm_new_x(new_x))   # reduction为占位层，输入直接输出
 
         return new_x, attn_dict
 
@@ -532,7 +532,7 @@ class GroupingLayer(nn.Module):
         """
         if self.with_group_token:
             group_token = self.group_token.expand(x.size(0), -1, -1)
-            if self.group_projector is not None:
+            if self.group_projector is not None: # 没进
                 group_token = group_token + self.group_projector(prev_group_token)
         else:
             group_token = None
@@ -541,7 +541,7 @@ class GroupingLayer(nn.Module):
         if self.with_transformer:
             cat_x = self.concat_x(x, group_token)
             for blk_idx, blk in enumerate(self.blocks):
-                if self.use_checkpoint:
+                if self.use_checkpoint: # 没进
                     cat_x = checkpoint.checkpoint(blk, cat_x)
                 else:
                     cat_x = blk(cat_x)

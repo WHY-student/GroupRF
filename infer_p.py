@@ -128,7 +128,7 @@ def test_matrics(
         detection_method=detection_method,
     )
 
-def get_model(cfg, ckp, mode, transformers_model, device="cuda:1"):
+def get_model(cfg, ckp, mode, transformers_model, device="cuda:2"):
 
     cfg = mmcv.Config.fromfile(cfg)
     if mode=='v6':
@@ -839,8 +839,8 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v6.py'
-    ckp=''
+    cfg='configs/psg/v0.py'
+    ckp='output/v0/epoch_12.pth'
     mode='v6'
     # testFPS(cfg)
     # exit(0)

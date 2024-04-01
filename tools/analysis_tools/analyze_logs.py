@@ -54,43 +54,77 @@ def plot_curve(log_dicts, args):
         epochs = list(log_dict.keys())
         for j, metric in enumerate(metrics):
             print(f'plot curve of {args.json_logs[i]}, metric is {metric}')
-            if metric not in log_dict[epochs[int(args.eval_interval) - 1]]:
-                if 'mAP' in metric:
-                    raise KeyError(
-                        f'{args.json_logs[i]} does not contain metric '
-                        f'{metric}. Please check if "--no-validate" is '
-                        'specified when you trained the model.')
-                raise KeyError(
-                    f'{args.json_logs[i]} does not contain metric {metric}. '
-                    'Please reduce the log interval in the config so that '
-                    'interval is less than iterations of one epoch.')
+            # if metric not in log_dict[epochs[int(args.eval_interval) - 1]]:
+            #     if 'mAP' in metric:
+            #         raise KeyError(
+            #             f'{args.json_logs[i]} does not contain metric '
+            #             f'{metric}. Please check if "--no-validate" is '
+            #             'specified when you trained the model.')
+            #     raise KeyError(
+            #         f'{args.json_logs[i]} does not contain metric {metric}. '
+            #         'Please reduce the log interval in the config so that '
+            #         'interval is less than iterations of one epoch.')
 
-            if 'mAP' in metric:
-                xs = []
-                ys = []
-                for epoch in epochs:
-                    ys += log_dict[epoch][metric]
-                    if 'val' in log_dict[epoch]['mode']:
-                        xs.append(epoch)
+            # if 'mAP' in metric:
+            #     xs = []
+            #     ys = []
+            #     for epoch in epochs:
+            #         ys += log_dict[epoch][metric]
+            #         if 'val' in log_dict[epoch]['mode']:
+            #             xs.append(epoch)
+            #     plt.xlabel('epoch')
+            #     plt.plot(xs, ys, label=legend[i * num_metrics + j], marker='o')
+            # else:
+            #     xs = []
+            #     ys = []
+            #     num_iters_per_epoch = log_dict[epochs[0]]['iter'][-2]
+            #     for epoch in epochs:
+            #         iters = log_dict[epoch]['iter']
+            #         if log_dict[epoch]['mode'][-1] == 'val':
+            #             iters = iters[:-1]
+            #         xs.append(
+            #             np.array(iters) + (epoch - 1) * num_iters_per_epoch)
+            #         ys.append(np.array(log_dict[epoch][metric][:len(iters)]))
+            #     xs = np.concatenate(xs)
+            #     ys = np.concatenate(ys)
+            #     plt.xlabel('iter')
+            #     plt.plot(
+            #         xs, ys, label=legend[i * num_metrics + j], linewidth=0.5)
+            plot_epochs = []
+            plot_iters = []
+            plot_values = []
+            # In some log files exist lines of validation,
+            # `mode` list is used to only collect iter number
+            # of training line.
+            for epoch in epochs:
+                epoch_logs = log_dict[epoch]
+                if metric not in epoch_logs.keys():
+                    continue
+                if metric in ['mIoU', 'mAcc', 'aAcc']:
+                    plot_epochs.append(epoch)
+                    plot_values.append(epoch_logs[metric][0])
+                elif metric in ['loss_relationship', 'loss']:
+                    plot_epochs.append(epoch)
+                    average_loss = np.mean(epoch_logs[metric][:])
+                    plot_values.append(average_loss)
+                else:
+                    for idx in range(len(epoch_logs[metric])):
+                        plot_iters.append(epoch_logs['step'][idx])
+                        plot_values.append(epoch_logs[metric][idx])
+            ax = plt.gca()
+            label = legend[i * num_metrics + j]
+            if metric in ['mIoU', 'mAcc', 'aAcc']:
+                ax.set_xticks(plot_epochs)
+                plt.xlabel('step')
+                plt.plot(plot_epochs, plot_values, label=label, marker='o')
+            elif metric in ['loss_relationship', 'loss']:
+                ax.set_xticks(plot_epochs)
                 plt.xlabel('epoch')
-                plt.plot(xs, ys, label=legend[i * num_metrics + j], marker='o')
+                plt.plot(plot_epochs, plot_values, label=label, marker='o')
             else:
-                xs = []
-                ys = []
-                num_iters_per_epoch = log_dict[epochs[0]]['iter'][-2]
-                for epoch in epochs:
-                    iters = log_dict[epoch]['iter']
-                    if log_dict[epoch]['mode'][-1] == 'val':
-                        iters = iters[:-1]
-                    xs.append(
-                        np.array(iters) + (epoch - 1) * num_iters_per_epoch)
-                    ys.append(np.array(log_dict[epoch][metric][:len(iters)]))
-                xs = np.concatenate(xs)
-                ys = np.concatenate(ys)
                 plt.xlabel('iter')
-                plt.plot(
-                    xs, ys, label=legend[i * num_metrics + j], linewidth=0.5)
-            plt.legend()
+                plt.plot(plot_iters, plot_values, label=label, linewidth=0.5)
+        plt.legend()
         if args.title is not None:
             plt.title(args.title)
     if args.out is None:

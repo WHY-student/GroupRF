@@ -236,7 +236,7 @@ val_dataloader = dict(
 )
 
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=4,
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
@@ -272,7 +272,7 @@ embed_multi = dict(lr_mult=1.0, decay_mult=0.0)
 # optimizer
 optimizer = dict(
     type='AdamW',
-    lr=0.0001,
+    lr=0.0005,
     weight_decay=0.05,
     eps=1e-8,
     betas=(0.9, 0.999),
