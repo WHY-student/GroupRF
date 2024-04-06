@@ -128,6 +128,7 @@ model = dict(
         use_checkpoint=False,
         hard_assignment=True,
         feed_forward=256,
+        # with_fuse = False,
     ),
     panoptic_fusion_head=dict(
         type='MaskFormerFusionHead2',
@@ -272,17 +273,17 @@ embed_multi = dict(lr_mult=1.0, decay_mult=0.0)
 # optimizer
 optimizer = dict(
     type='AdamW',
-    lr=0.0005,
+    lr=0.0001,
     weight_decay=0.05,
     eps=1e-8,
     betas=(0.9, 0.999),
     paramwise_cfg=dict(
         custom_keys={
             'backbone': dict(lr_mult=0.1, decay_mult=1.0),
-            'panoptic_head': dict(lr_mult=0.1, decay_mult=1.0),
-            # 'query_embed': embed_multi,
-            # 'query_feat': embed_multi,
-            # 'level_embed': embed_multi,
+            # 'panoptic_head': dict(lr_mult=0.1, decay_mult=1.0),
+            'query_embed': embed_multi,
+            'query_feat': embed_multi,
+            'level_embed': embed_multi,
         },
         norm_decay_mult=0.0))
 optimizer_config = dict(grad_clip=dict(max_norm=0.01, norm_type=2))
@@ -344,4 +345,4 @@ mp_start_method = 'fork'
 load_from = './checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
 # resume_from = './output/v0/latest.pth'
 resume_from = None
-work_dir = './output/v0'
+work_dir = './output/v0_prediction_attention'

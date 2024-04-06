@@ -481,24 +481,25 @@ class GroupingLayer(nn.Module):
         self.with_group_block = with_group_block
         # build blocks
         self.depth = depth
-        blocks = []
-        for i in range(depth):
-            blocks.append(
-                AttnBlock(
-                    dim=dim,
-                    num_heads=num_heads,
-                    mlp_ratio=mlp_ratio,
-                    qkv_bias=qkv_bias,
-                    qk_scale=qk_scale,
-                    drop=drop,
-                    attn_drop=attn_drop,
-                    drop_path=drop_path[i],
-                    norm_layer=norm_layer))
-        self.blocks = nn.ModuleList(blocks)
+        if with_transformer:
+            blocks = []
+            for i in range(depth):
+                blocks.append(
+                    AttnBlock(
+                        dim=dim,
+                        num_heads=num_heads,
+                        mlp_ratio=mlp_ratio,
+                        qkv_bias=qkv_bias,
+                        qk_scale=qk_scale,
+                        drop=drop,
+                        attn_drop=attn_drop,
+                        drop_path=drop_path[i],
+                        norm_layer=norm_layer))
+            self.blocks = nn.ModuleList(blocks)
 
-        self.downsample = downsample
+        if with_group_block:
+            self.downsample = downsample
         self.input_resolution = num_input_token
-        self.use_checkpoint = use_checkpoint
 
         self.group_projector = group_projector
 

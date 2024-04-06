@@ -100,8 +100,8 @@ class Mask2FormerVit(Mask2FormerRelation):
         # exit(0)
         losses_relation['loss_relationship'] = self.relationship_head.loss(relation_pred, all_edge_lbl)
         
-        recall = self.get_recall_N(relation_pred, all_edge_lbl, bs_size, img_metas)
-        losses_relation['rela.recall@20'] = recall
+        # recall = self.get_recall_N(relation_pred, all_edge_lbl, bs_size, img_metas)
+        # losses_relation['rela.recall@20'] = recall
 
         losses.update(losses_relation)
 

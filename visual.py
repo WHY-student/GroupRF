@@ -39,7 +39,7 @@ from mmdet.path import coco_root
 
 def show_gt(image_id, flag_show_relation=False):
     psg_val_data_file = 'dataset/psg/psg_test.json'
-    img_dir = coco_root
+    img_dir = coco_root + '/'
     psg_val_data = load_json(psg_val_data_file)
     for d in tqdm(psg_val_data['data']):
         if d['image_id'] == str(image_id):
@@ -342,12 +342,13 @@ def visualize_scene_graph(objects, relationships):
 if __name__=="__main__":
 
     INSTANCE_OFFSET = 1000
-    cfg='configs/psg/v0_ablation_none.py'
-    ckp='output/v0_ablation_none/epoch_12.pth'
+    cfg='configs/psg/v0_prediction_token.py'
+    ckp='output/v0_prediction_token/best_5e-5.pth'
 
-    image_id = 2316037
+    image_id = 2364856
+    device = "cuda:1"
 
-    model = get_model(cfg, ckp, mode='v6', transformers_model=None, device="cuda:0")
+    model = get_model(cfg, ckp, mode='v6', transformers_model=None, device=device)
     model.eval()
     # 模拟输入数据（替换为你的实际数据）
     # image_name = '/root/autodl-tmp/dataset/coco/val2017/000000507015.jpg'
@@ -360,7 +361,7 @@ if __name__=="__main__":
         transforms.ToTensor(),  # 将图像转换为 torch.Tensor
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # 标准化操作
     ])
-    input_data = torch.tensor(preprocess(image)).to("cuda:0")
+    input_data = preprocess(image).clone().detach().to(device)
     input_data = input_data.unsqueeze(0)
 
     imgs = input_data

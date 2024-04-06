@@ -42,6 +42,7 @@ def test_matrics(
         iou_thrs=0.5,
         detection_method='pan_seg',
         transformers_model='checkpoints/chinese-roberta-wwm-ext',
+        device="cuda:2"
     ):
     # psg_test_data_file = os.path.join(DATASETS_ROOT, psg_test_data_file)
     # img_prefix = os.path.join(DATASETS_ROOT, img_prefix)
@@ -51,7 +52,7 @@ def test_matrics(
     gt_results = []
     results = []
     psg_test_data = load_json(psg_test_data_file)
-    model = get_model(cfg, ckp, mode, transformers_model=transformers_model)
+    model = get_model(cfg, ckp, mode, transformers_model=transformers_model, device=device)
     for d in tqdm(psg_test_data['data']):
         img_file = os.path.join(img_prefix, d['file_name'])
         img = cv2.imread(img_file)
@@ -839,8 +840,8 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v0.py'
-    ckp='output/v0/epoch_12.pth'
+    cfg='configs/psg/v0_ablation_none.py'
+    ckp='output/v0_ablation_none/epoch_10.pth'
     mode='v6'
     # testFPS(cfg)
     # exit(0)
@@ -849,7 +850,8 @@ if __name__ == '__main__':
     test_matrics(
         cfg = cfg,
         ckp = ckp,
-        mode = mode
+        mode = mode,
+        device = "cuda:1"
     )
     
     # 获取提交的submit

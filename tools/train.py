@@ -58,7 +58,7 @@ def parse_args():
     #     type=int,
     #     help='id of gpu to use '
     #     '(only applicable to non-distributed training)',
-    #     default=2
+    #     default=1
     # )
     # parser.add_argument('--seed', type=int, default=0, help='random seed')
     # parser.add_argument(

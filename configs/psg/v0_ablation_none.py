@@ -21,6 +21,7 @@ model = dict(
         feed_forward=256,
         with_transformer=False,
         with_group_block=False,
+        with_fuse = False,
     )
 )
 

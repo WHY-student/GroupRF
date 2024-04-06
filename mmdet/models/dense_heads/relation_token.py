@@ -232,6 +232,7 @@ class rlnGroupTokenMultiHead(BaseModule):
         with_transformer=True,
         with_group_block=True,
         with_token = True,
+        with_fuse = True,
     ):
         super().__init__()
         norm_layer = nn.LayerNorm
@@ -292,11 +293,12 @@ class rlnGroupTokenMultiHead(BaseModule):
         self.token_num = num_output_groups[-1]
         
         self.with_token = with_token
+        self.with_fuse = with_fuse
 
         # 这里想模拟多头注意力，将每一个query token看成是一个头的一部分
-
-        # 每一个头的结果和其他头的结果做一个self.attention
-        self.relation_fuse = TransformerLayer(d_model=3*embed_dim, nhead=1, dropout=0.1)
+        if self.with_fuse:
+            # 每一个头的结果和其他头的结果做一个self.attention
+            self.relation_fuse = TransformerLayer(d_model=3*embed_dim, nhead=1, dropout=0.1)
 
         self.relation_embedding = Mlp(3*embed_dim,feed_forward, self.num_cls+1)
         self.relation_head = Mlp((self.num_cls+1)*self.token_num, feed_forward, self.num_cls+1)
@@ -321,10 +323,10 @@ class rlnGroupTokenMultiHead(BaseModule):
         object_feature_list, target_relation = self.get_embedding_relation(query_feat, pos_inds_list, pos_assigned_gt_inds_list, img_metas)
 
         relation_feature, all_edge_lbl, bs_size = concat_relation_features(object_feature_list, group_token, target_relation)
-        # N * 8* 768
-        relation_feature = relation_feature.permute(1,0,2)
-
-        relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
+        if self.with_fuse:
+            # N * 8* 768
+            relation_feature = relation_feature.permute(1,0,2)
+            relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
 
         relation_pred = self.relation_head(self.relation_embedding(relation_feature).reshape(relation_feature.shape[0], -1))
         # relation_pred = self.relation_head(relation_feature.reshape(relation_feature.shape[0], -1))
@@ -425,9 +427,10 @@ class rlnGroupTokenMultiHead(BaseModule):
         entity_embedding = query_feat[0][target_keep,:]
 
         relation_feature, neg_idx = concat_relation_features_test(entity_embedding, group_token)
-        relation_feature = relation_feature.permute(1,0,2)
+        if self.with_fuse:
 
-        relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
+            relation_feature = relation_feature.permute(1,0,2)
+            relation_feature = self.relation_fuse(relation_feature, relation_feature).permute(1,0,2)
 
         tokens_scores = self.relation_embedding(relation_feature)
 
