@@ -457,6 +457,7 @@ class Mask2FormerVitForinfer(Mask2FormerVit):
 
         res['rela_results'] = rl
         res['pan_results'] = res['pan_results'].detach().cpu().numpy()
+        res['relation_pred'] = relation_pred
 
         return [res]
 

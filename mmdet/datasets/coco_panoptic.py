@@ -64,7 +64,6 @@ class COCOPanoptic(COCO):
                         anns[seg_ann['id']].append(seg_ann)
                     else:
                         anns[seg_ann['id']] = [seg_ann]
-
                 relations[ann['image_id']] = ann['relations']
 
         if 'images' in self.dataset:

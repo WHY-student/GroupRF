@@ -371,7 +371,8 @@ def show_relations(relations, image_name, rel_obj_labels, masks, out_dir):
             color=colormap_coco[s_idx],
             size=text_size,
             padding=text_padding,
-            font=font,
+            box_color='black',
+            # font=font,
         )
         curr_x += text_width
         # Draw relation text
@@ -382,8 +383,7 @@ def show_relations(relations, image_name, rel_obj_labels, masks, out_dir):
             y=curr_y,
             size=text_size,
             padding=text_padding,
-            box_color='gainsboro',
-            font=font,
+            # font=font,
         )
         curr_x += text_width
 
@@ -396,7 +396,8 @@ def show_relations(relations, image_name, rel_obj_labels, masks, out_dir):
             color=colormap_coco[o_idx],
             size=text_size,
             padding=text_padding,
-            font=font,
+            box_color='black',
+            # font=font,
         )
         output_viz_graph = np.vstack([viz_masked_img, viz_graph.get_image()])
         # if out_file is not None:

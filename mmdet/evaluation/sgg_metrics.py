@@ -240,6 +240,9 @@ class SGRecall(SceneGraphEvaluation):
 
         if self.detection_method == 'pan_seg':
             gt_det_results = gt_masks
+        # gt_rels: groundtruth.rels
+        # gt_classes: groundtruth.labels
+        # gt_masks: groundtruth.masks
         gt_triplets, gt_triplet_det_results, _ = self.generate_triplet(gt_rels, gt_classes, gt_det_results)
 
         local_container['gt_triplets'] = gt_triplets

@@ -20,7 +20,7 @@ model = dict(
         hard_assignment=True,
         feed_forward=256,
         with_transformer=False,
-        with_group_block=False,
+        with_group_block=True,
         with_token=False,
         with_fuse = False,
     )
@@ -29,4 +29,4 @@ model = dict(
 load_from = './checkpoints/mask2former_r50_lsj_8x2_50e_coco-panoptic_20220326_224516-11a44721.pth'
 # resume_from = './output/v0_1/latest.pth'
 resume_from = None
-work_dir = './output/v0_ablation_none'
+work_dir = './output/v0_ablation_transformer'

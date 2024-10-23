@@ -8,6 +8,8 @@ from torchvision import transforms
 from PIL import Image
 import PIL
 from util import CLASSES, PREDICATES, get_colormap, load_json, read_image, show_relations, draw_text
+from typing import Tuple
+import os.path as osp
 import os
 from panopticapi.utils import rgb2id, id2rgb
 
@@ -339,14 +341,15 @@ def visualize_scene_graph(objects, relationships):
 
     plt.savefig('savefig_example2.png')
 
+
 if __name__=="__main__":
 
     INSTANCE_OFFSET = 1000
     cfg='configs/psg/v0_prediction_token.py'
     ckp='output/v0_prediction_token/best_5e-5.pth'
 
-    image_id = 2364856
-    device = "cuda:1"
+    image_id = 2346547
+    device = "cuda:2"
 
     model = get_model(cfg, ckp, mode='v6', transformers_model=None, device=device)
     model.eval()
@@ -399,9 +402,10 @@ if __name__=="__main__":
     # img = converter.enhance(0.01)
 
     
-    visualize_objects_and_relations(img, object_masks, relations[:20])
-    # visualize_scene_graph(labels, relation[:20])
-    # show_relations(relation[:20], image_name, labels, object_masks, out_dir='000000043816_2364856/')
+    # visualize_objects_and_relations(img, object_masks, relations[:20])
+    # visualize_scene_graph(labels, relations[:20])
+    # relations[13][2] = 23
+    # show_relations(relations[:20], image_name, labels, object_masks, out_dir='107912/')
 
 
 

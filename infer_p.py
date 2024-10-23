@@ -53,6 +53,7 @@ def test_matrics(
     results = []
     psg_test_data = load_json(psg_test_data_file)
     model = get_model(cfg, ckp, mode, transformers_model=transformers_model, device=device)
+    
     for d in tqdm(psg_test_data['data']):
         img_file = os.path.join(img_prefix, d['file_name'])
         img = cv2.imread(img_file)
@@ -113,6 +114,10 @@ def test_matrics(
                 masks=gt_masks,
             ))
         # prog_bar.update()
+        # for relation in ann['rels']:
+        #     if relation[-1] == 8:
+        #         print(d['image_id'])
+        #         break
 
     print('\n')
 
@@ -213,7 +218,7 @@ def get_val_p(
     )
     psg_val_data = load_json(psg_test_data_file)
 
-    model = get_model(cfg, ckp, mode, transformers_model=transformers_model)
+    model = get_model(cfg, ckp, mode, transformers_model=transformers_model, device="cuda:1")
     # cfg = Config.fromfile(cfg)
     # model = build_detector(
     #     cfg.model,
@@ -840,8 +845,8 @@ def testFPS(config):
 
 if __name__ == '__main__':
     
-    cfg='configs/psg/v0_ablation_none.py'
-    ckp='output/v0_ablation_none/epoch_10.pth'
+    cfg='output/v6/v6.py'
+    ckp='output/v6/best_checkpoint.pth'
     mode='v6'
     # testFPS(cfg)
     # exit(0)
@@ -851,15 +856,17 @@ if __name__ == '__main__':
         cfg = cfg,
         ckp = ckp,
         mode = mode,
-        device = "cuda:1"
+        device = "cuda:2"
     )
+    
+    # print(sgdet_mean_recall_collect, sgdet_mean_recall_hit)
     
     # 获取提交的submit
     # get_val_p(
     #     cfg = cfg,
     #     ckp = ckp,
     #     mode = mode,
-    #     val_mode_output_dir='submit/val_none_latest',
+    #     val_mode_output_dir='submit/val_one_stage',
     # )
 
 
