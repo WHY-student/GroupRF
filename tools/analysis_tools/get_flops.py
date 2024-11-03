@@ -15,7 +15,7 @@ except ImportError:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('--config', default='configs/psg/v6_token_ablation_32_8.py', help='train config file path')
+    parser.add_argument('--config', default='configs/psg/v6.py', help='train config file path')
     parser.add_argument(
         '--shape',
         type=int,
